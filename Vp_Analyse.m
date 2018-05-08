@@ -4,13 +4,20 @@
 
 %% Info 
 
+% Analyses data output from Vp_Extract.m 
+
+% Input: 
+    % Workspace or workspaces output from Vp_Extract.m  
+
+% Output: 
+    % Figures & Statistics 
+    
 %% Assumptions 
  
 % Experiments to be merged are 'similar': 
-    % Groups are numbered the same (e.g. WT,Het,Hom - 1,2,3) 
+    % Groups are numbered the same across experiments (e.g. WT,Het,Hom - 1,2,3) 
     % Experiments have the same number of days/nights 
     % Experiments have the same groups? 
-% Minimum value of 1 in parameter_dists 
 
 %% Dependencies 
 
@@ -31,6 +38,9 @@
     
 et = 2; % Analyse data as one experiment (1) or treat data seperatly (2) 
 ct = [2 3]; % days and nights of interest 
+ac = 1; % adjust color scheme (1) or not (2)  
+set(0,'DefaultFigureWindowStyle','docked'); % dock figures
+set(0,'defaultfigurecolor',[1 1 1]); % white background
 
 %% Selecting Files  
  
@@ -112,7 +122,7 @@ ct = [2 3]; % days and nights of interest
 
 % Calculate time off-sets between repeats of experiments 
 [~,c] = find(lb_sec == max(lb_sec(2,:)));
-    % Find the column (c) with the longest starting window
+    % Find the column (c) with the longest starting window (in seconds) 
 for e = 1:size(lb_sec,2) % For each experiment
     offset(1,e) = lb_sec(2,c) - lb_sec(2,e); % Calculate the offset
 end
@@ -195,16 +205,18 @@ if et == 1
 end
 
 % Adjust color scheme 
-if max(group_tags) == 1 % for WT experiments 
-    cmap(1,:) = [135 206 250]/255; % light sky blue
-    cmap_2(1,:) = cmap;
-    cmap_2(2,:) = [25 25 112]/255; % midnight blue
-else
-    cmap_2 = flip(cmap_2); % flip cmap
-    for c = 1:2:size(cmap_2,1)
-        cmap_2([c c+1],:) = cmap_2([c+1 c],:); % swap the colors around
+if ac == 1
+    if max(group_tags) == 1 % for WT experiments
+        cmap(1,:) = [135 206 250]/255; % light sky blue
+        cmap_2(1,:) = cmap;
+        cmap_2(2,:) = [25 25 112]/255; % midnight blue
+    else
+        cmap_2 = flip(cmap_2); % flip cmap
+        for c = 1:2:size(cmap_2,1)
+            cmap_2([c c+1],:) = cmap_2([c+1 c],:); % swap the colors around
+        end
+        cmap = cmap_2(1:2:size(cmap_2,1),:); % Extract main colors
     end
-    cmap = cmap_2(1:2:size(cmap_2,1),:); % Extract main colors
 end
 
 % Determine time windows
@@ -215,7 +227,7 @@ time_window(1) = min([days_crop(days) nights_crop(nights)]);
 time_window(2) = max([days_crop(days) nights_crop(nights)]);
 
 % Clean up
-clear f p e g t start top_up_bin et ct   
+clear f p e g t start top_up_bin et ct ac   
 
 %% Parameters Across Time 
 
@@ -257,7 +269,7 @@ end
 
 % Pre-allocation 
 parameter_dists = cell(1,size(parameters,2)); 
-for p = find(parameter_smooth == 0) % For wake bout parameters 
+for p = find(parameter_smooth == 0) % For most parameters 
     parameter_dists{p} = nan(size(wake_cells,2),size(min(dist_boundaries(:,p)):...
         max(dist_boundaries(:,p)),2),size(parameter_matrix,3),'single'); 
         % {parameters} fish x parameter range x time 
@@ -306,7 +318,7 @@ for p = find(parameter_smooth == 0) % For most parameters
 end
  toc 
  
-clear a counter f p pd t time_start time_stop dist_boundaries
+clear a counter f p pd t time_start time_stop
 
 %% Figure - Parameter Means 
 
@@ -484,8 +496,6 @@ clear a g h icons plots str legend_cell legend_cols legend_lines n r x y_lims
 %% Figure - Parameter Distributions V3
 % Uses a log axis for plots
 % Plot's Std Rather than SEM
-% Note I've left the SEM Code (commented out) in as this will probably be better
-% for more groups
 
 figure;
 for p = 1:size(parameters,2) - 2 % For each parameter
@@ -510,32 +520,17 @@ for p = 1:size(parameters,2) - 2 % For each parameter
         data{3,1} = repmat(experiment_tags,[size(data{1,1},1)/size(experiment_tags,1),1]);
         data{3,2} = repmat(experiment_tags,[size(data{1,2},1)/size(experiment_tags,1),1]);
         
-        % V2
-        % Find a cut off for each figure
-        % This helps with visualisation & prevents the generation of
-        % large patch objects which often crash Matlab
-        %crop = find(nanmean([data{1,1} ; data{1,2}]) < 0.01,1,'first');
-        
         % V3
-        crop = size(data{1,1},2); % crop = all data
+        crop = max(dist_boundaries(:,p)); % crop = all data
         
         for e = 1:max(experiment_tags) % For each experimet
             col = 1;
             for g = 1:max(group_tags) % For each group
                 for t = 1:2 % For day/night
-                    % SEM
-                    %                 if t == 1 % for day
-                    %                     sample = size(find(data{2,t} == g & data{3,t} == e),1)/...
-                    %                         size(days,2);
-                    %                 else % for night
-                    %                     sample = size(find(data{2,t} == g & data{3,t} == e),1)/...
-                    %                         size(nights,2);
-                    %                 end
-                    %                     Find the number of fish
                     
-                    legend_lines(col) = shadedErrorBar((1:crop)/unit_conversion(1,p),...
-                        nanmean(data{1,t}(data{2,t} == g & data{3,t} == e,1:crop)),...
-                        nanstd(data{1,t}(data{2,t} == g & data{3,t} == e,1:crop))...%/sqrt(sample)
+                    legend_lines(col) = shadedErrorBar((min(dist_boundaries(:,p)):crop)/unit_conversion(1,p),...
+                        nanmean(data{1,t}(data{2,t} == g & data{3,t} == e,:)),...
+                        nanstd(data{1,t}(data{2,t} == g & data{3,t} == e,:))...
                         ,'lineprops',{'color',cmap_2(col,:)+(1-cmap_2(col,:))*(1-(1/e^.5))});
                     % Plot - note that this is now in appropriate units
                     % (eg.seconds)
@@ -568,15 +563,15 @@ for p = 1:size(parameters,2) - 2 % For each parameter
                 
             end
         end
-        axis([1/unit_conversion(1,p) crop/unit_conversion(1,p) ...
+        axis([min(dist_boundaries(:,p))/unit_conversion(1,p) crop/unit_conversion(1,p) ...
             min(y_lims(2,:)) max(y_lims(1,:))]); % Set axis limits
         try
             set(gca,'XTick',...
-                [1/unit_conversion(1,p), 1/unit_conversion(1,p)*10,...
+                [min(dist_boundaries(:,p))/unit_conversion(1,p), (min(dist_boundaries(:,p))/unit_conversion(1,p))*10,...
                 crop/unit_conversion(1,p)]); % set x tick labels
         catch
             set(gca,'XTick',...
-                [1/unit_conversion(1,p),(0.5*crop)/unit_conversion(1,p),...
+                [min(dist_boundaries(:,p))/unit_conversion(1,p),(0.5*crop)/unit_conversion(1,p),...
                 crop/unit_conversion(1,p)]); % set x tick labels      
         end
         % Set decimal places depending on units
@@ -585,6 +580,7 @@ for p = 1:size(parameters,2) - 2 % For each parameter
         else
             xtickformat('%.0f');
         end
+        
         set(gca,'XScale','log'); % set log axis
         xlabel(units(p),'Fontsize',12); % X labels
         ylabel('Probability','Fontsize',12); % Y label
@@ -662,31 +658,16 @@ for p = 1:size(parameters,2) - 2 % For each parameter
         data{3,1} = repmat(experiment_tags,[size(data{1,1},1)/size(experiment_tags,1),1]);
         data{3,2} = repmat(experiment_tags,[size(data{1,2},1)/size(experiment_tags,1),1]);
         
-        % V2
-        % Find a cut off for each figure
-        % This helps with visualisation & prevents the generation of
-        % large patch objects which often crash Matlab
-        %crop = find(nanmean([data{1,1} ; data{1,2}]) < 0.01,1,'first');
-        
         % V3
-        crop = size(data{1,1},2); % crop = all data
+        crop = max(dist_boundaries(:,p)); % crop = all data
         
         for e = 1:max(experiment_tags) % For each experimet
             col = 1;
             for g = 1:max(group_tags) % For each group
                 for t = 1:2 % For day/night
-                    % SEM
-                    %                 if t == 1 % for day
-                    %                     sample = size(find(data{2,t} == g & data{3,t} == e),1)/...
-                    %                         size(days,2);
-                    %                 else % for night
-                    %                     sample = size(find(data{2,t} == g & data{3,t} == e),1)/...
-                    %                         size(nights,2);
-                    %                 end
-                    %                     Find the number of fish
                     
-                    legend_lines(col) = plot((1:crop)/unit_conversion(1,p),...
-                        nanmean(data{1,t}(data{2,t} == g & data{3,t} == e,1:crop)),...
+                    legend_lines(col) = plot((min(dist_boundaries(:,p)):crop)/unit_conversion(1,p),...
+                        nanmean(data{1,t}(data{2,t} == g & data{3,t} == e,:)),...
                         'color',cmap_2(col,:)+(1-cmap_2(col,:))*(1-(1/e^.5)),...
                         'linewidth',3);
                     % Plot - note that this is now in appropriate units
@@ -720,15 +701,15 @@ for p = 1:size(parameters,2) - 2 % For each parameter
                 
             end
         end
-        axis([1/unit_conversion(1,p) crop/unit_conversion(1,p) ...
+        axis([min(dist_boundaries(:,p))/unit_conversion(1,p) crop/unit_conversion(1,p) ...
             min(y_lims(2,:)) max(y_lims(1,:))]); % Set axis limits
         try
             set(gca,'XTick',...
-                [1/unit_conversion(1,p), 1/unit_conversion(1,p)*10,...
+                [min(dist_boundaries(:,p))/unit_conversion(1,p), (min(dist_boundaries(:,p))/unit_conversion(1,p))*10,...
                 crop/unit_conversion(1,p)]); % set x tick labels
         catch
             set(gca,'XTick',...
-                [1/unit_conversion(1,p),(0.5*crop)/unit_conversion(1,p),...
+                [min(dist_boundaries(:,p))/unit_conversion(1,p),(0.5*crop)/unit_conversion(1,p),...
                 crop/unit_conversion(1,p)]); % set x tick labels
         end
         % Set decimal places depending on units
@@ -825,13 +806,7 @@ if size(days_crop(days),2) == size(nights_crop(nights),2) &&... % If there are a
     end 
 end 
 
-% Pre-allocation (Need to test to find x)  
-for p = 1:size(parameters,2) - 2 % For each parameter 
-    twa.p(1:15,p) = NaN; % Comparisons x parameters  
-    twa.stats{p} = []; % Stats structure 
-end 
-
-% Calculations - account for experiment tags
+% Calculations
 for p = 1:size(parameters,2)-2 % For each parameter
     clear scrap;
     scrap = parameter_comparisons{p}(:,:,time_window(1):time_window(2));
@@ -845,28 +820,12 @@ for p = 1:size(parameters,2)-2 % For each parameter
         end 
     end 
     
-    scrap(isnan(scrap)) = []; 
-    
-    if size(days_crop(days),2) == size(nights_crop(nights),2) &&... % If comparing development 
-            size(days_crop(days),2) > 1 
-        if max(experiment_tags) > 1 % If comparing experiments 
-            [twa.p(:,p),~,twa.stats{p}] = anovan(scrap,...
-                {anova_group,anova_time,anova_development,anova_experiment},'display','off','model','full');
-        else % Development but no experiments 
-            [twa.p(1:7,p),~,twa.stats{p}] = anovan(scrap,...
-                {anova_group,anova_time,anova_development},'display','off','model','full');
-        end
-    else % Without development 
-        if max(experiment_tags) > 1 % With experiments 
-            [twa.p(1:7,p),~,twa.stats{p}] = anovan(scrap,...
-                {anova_group,anova_time,anova_experiment},'display','off','model','full'); % Try without
-        else % Without experiments 
-            [twa.p(1:3,p),~,twa.stats{p}] = anovan(scrap,...
-                {anova_group,anova_time},'display','off','model','full'); % Try without
-        end
-        
-    end
-    
+    scrap(isnan(scrap)) = []; % remove NaN values 
+
+    [twa.p(:,p),~,twa.stats{p}] = anovan(scrap,...
+        {anova_group,anova_time,anova_development,anova_experiment},...
+        'display','off','model','full');
+            
 end
 
 clear anova_development anova_group anova_time anova_experiment p scrap t
