@@ -118,6 +118,10 @@ else %If selected
     disp(['User selected ', fullfile(pathname, filename)]) % Show selected filename
 end
 
+% Select a save path 
+save_pathname = uigetdir([],'Select a save location'); 
+[~,save_name,~] = fileparts(filename); % assign file name for save 
+
 %% Load Data from Excel Sheets 
 
 tic
@@ -568,8 +572,8 @@ clear f fps t top_up
 % Generate group tags 
 group_tags = nan(size(delta_px_sq,2),1); % Pre-allocate
 for g = 1:size(geno_list.data,2) % For each group 
-    group_tags(geno_list.data(1:find(isnan(geno_list.data(:,g))==0,1,'last')...
-        ,g)) = g; % Assign group membership  
+    group_tags(geno_list.data(1:find(isnan(geno_list.data(:,g))==0,1,'last'),...
+        g)) = g; % Assign group membership  
 end 
 delta_px_sq(:,isnan(group_tags)) = []; % Remove data   
 group_tags(isnan(group_tags)) = []; % Remove blank values 
@@ -599,10 +603,10 @@ unit_conversion(2,:) = [fps 1 1 1 1 1 1 1 1 fps 1 1];
 
 % Specify units (for figures) 
 units = {'Seconds','Delta Px','Delta Px','Delta Px','Delta Px','Delta Px',...
-    'No.','Hours','Delta Px','Seconds','No.','Hours'};
+    'Number','Hours','Delta Px','Seconds','Number','Hours'};
 units_2 = {'Seconds','Delta Px','Delta Px','Delta Px','Delta Px','Delta Px',...
-    'No.',horzcat('Seconds/',num2str(fps),'s'),'Delta Px','Seconds',...
-    'No.',horzcat('Seconds/',num2str(fps),'s')};
+    'Number',horzcat('Seconds/',num2str(fps),'s'),'Delta Px','Seconds',...
+    'Number',horzcat('Seconds/',num2str(fps),'s')};
 
 % Specify Smoothing operation (0 = mean, 1 = total, 2 = max) - for figures 
 parameter_smooth(1:size(parameters,2)) = 0; 
@@ -904,3 +908,7 @@ end
 lb_sec = [1 ; find(diff(dn_sec) ~= 0) + 1; size(delta_px_sq_sec_smooth,1)];
 
 clear a f p t 
+
+%% Save WorkSpace 
+
+save(strcat(save_pathname,'\',save_name,'.mat'),'-v7.3'); % save data  
