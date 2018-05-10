@@ -55,18 +55,14 @@
     
 % General  
 lines_per_sheet = 50000; % Specify the number of data points per Excel sheet 
-box = 1; % set which of the two boxes you want to use (*) 
+box = 2; % set which of the two boxes you want to use (*) 
 threshold = 200; % Maximum delta px value (**)  
 top_up = []; % alter to light boundaries where you topped up fish water. 
     % E.g. Day 2 and 3 (top_up = [2 4]). 
     % E.g. Not topped up (top_up = []). 
-time_bins = 60*15; % Choose plot smoothing (in minutes) 
+time_bins = 60*15; % Choose plot smoothing (from seconds) 
 days = [1 2 3 4]; % number of days  
 nights = [1 2 3]; % number of nights 
-
-% Figure Settings  
-set(0,'DefaultFigureWindowStyle','docked'); % dock figures 
-set(0,'defaultfigurecolor',[1 1 1]); % white background
 
 % Colors 
 col = 'RedBlue'; % (***) 
@@ -121,6 +117,7 @@ end
 % Select a save path 
 save_pathname = uigetdir([],'Select a save location'); 
 [~,save_name,~] = fileparts(filename); % assign file name for save 
+disp(['Save path ',save_pathname]); % report 
 
 %% Load Data from Excel Sheets 
 
