@@ -214,9 +214,10 @@ axis([1 length(explained) ylim]);
 box off; set(gca, 'Layer','top'); set(gca,'Fontsize',32); % Format
 set(gca,'FontName','Calibri');
 
+% Save here 
 
 %% Clustering Settings 
-
+            % load X here 
 reps = 200; % set the number of repetitions
 k_vals = 2:20; % set values of k (clusters) to try
 a_size = 60000; % number of points to check  
@@ -238,14 +239,15 @@ save_pathname = uigetdir([],'Select a save location');
 
 for s = 1:2 % for active & inactive
     tic 
-    [ea{s,1}, idx{s,1}, idx_cts{s,1}, ~, ...
-        ea_links{s,1}, ea_idx{s,1}, ~, th(s,1), sample_a{s,1},sample_a_n{s,1}] = ...
+    [ea, idx, idx_cts, ~, ...
+        ea_links, ea_idx, ~, th, sample_a,sample_a_n] = ...
         gmm_sample_ea(X{s,1},reps,k_vals,a_size,s_vals,rv,GMM_reps,max_its,method,nn);
     toc 
+    save(strcat(save_pathname,'\','180513','_',num2str(s),'.mat'),'-v7.3'); % save data  
+    clear ea idx idx_cts ea_links ea_idx th sample_a sample_a_n
 end
 
 clear s 
-save(strcat(save_pathname,'\','180513','.mat'),'-v7.3'); % save data  
 
 %% Post-Clustering Settings 
 
