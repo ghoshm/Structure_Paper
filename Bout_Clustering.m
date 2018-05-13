@@ -217,10 +217,10 @@ set(gca,'FontName','Calibri');
 % Save here 
 
 %% Clustering Settings 
-            % load X here 
+load('D:\Behaviour\SleepWake\Re_Runs\Clustered_Data\Draft_1\Pre.mat', 'X'); % load X
 reps = 200; % set the number of repetitions
 k_vals = 2:20; % set values of k (clusters) to try
-a_size = 60000; % number of points to check  
+a_size = 50000; % number of points to check  
 s_vals = [10000,100000]; % min & max points to sample (uniformly)
 GMM_reps = 5; % number of GMM Models to fit per iteration 
 max_its = 1000; % number of GMM iterations (per repetition) 
