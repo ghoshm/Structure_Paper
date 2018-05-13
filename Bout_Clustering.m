@@ -109,7 +109,7 @@ toc
 %% Options 
 
 % Grouping repeats of experiments (hard coded)
-experiment_reps = [1 1 1 2 2 3 3 4 5]; % experiment groupings 
+experiment_reps = [1 1 1 2 2 3 4]; % experiment groupings 
 i_experiment_reps = i_experiment_tags;
 for er = 1:max(experiment_reps) % for each repeat 
     found = find(experiment_reps == er); % find experiments
@@ -137,7 +137,7 @@ end
 
 % Adjust time windows (Hard coded) 
 for e = 1:size(time_window,2) % for each experiment 
-    if experiment_reps(e) < 4 
+    if experiment_reps(e) < 3 
        time_window{e} = [3 6]; % take the middle two days/nights 
        days{e} = [2 3]; nights{e} = [2 3]; 
     else
@@ -186,15 +186,40 @@ clear f
 
 %% PCA Figure 
 
-% Subplots 
-    % Scree Plot 
-    % Coeff Plot 
+figure; 
+% Scree Plot 
+subplot(1,2,1); hold on; 
+plot(1:length(explained),explained,'linewidth',3,'color',night_color{1});
+scatter(1:length(explained),explained,90,'filled',...
+    'markerfacecolor',night_color{1},'markeredgecolor','k');
+scatter(1,explained(1),90,'filled','markerfacecolor',cmap_2{1}(1,:)); 
+scatter(2,explained(2),90,'filled','markerfacecolor',cmap_2{1}(2,:)); 
+scatter(3,explained(3),90,'filled','markerfacecolor',[1 0.5 0]); 
+xlabel('Component','Fontsize',32); 
+ylabel('Variance Explained (%)','Fontsize',32);
+box off; set(gca, 'Layer','top'); set(gca,'Fontsize',32); % Format
+set(gca,'FontName','Calibri');
+axis([1 length(explained) ylim]);
+
+% Coeff Plot 
+subplot(1,2,2); hold on; 
+plot(coeff(:,1),'color',cmap_2{1}(1,:),'linewidth',3);
+plot(coeff(:,2),'color',cmap_2{1}(2,:),'linewidth',3); 
+plot(coeff(:,3),'color',[1 0.5 0],'linewidth',3); 
+ylabel('Coefficient','Fontsize',32); 
+set(gca,'XTick',1:length(explained)); 
+set(gca,'XTickLabels',{'Length','Mean','Std','Total','Min','Max'},'fontsize',32); 
+xtickangle(45); 
+axis([1 length(explained) ylim]);
+box off; set(gca, 'Layer','top'); set(gca,'Fontsize',32); % Format
+set(gca,'FontName','Calibri');
+
 
 %% Clustering Settings 
 
 reps = 200; % set the number of repetitions
 k_vals = 2:20; % set values of k (clusters) to try
-a_size = 50000; % number of points to check  
+a_size = 60000; % number of points to check  
 s_vals = [10000,100000]; % min & max points to sample (uniformly)
 GMM_reps = 5; % number of GMM Models to fit per iteration 
 max_its = 1000; % number of GMM iterations (per repetition) 
@@ -206,7 +231,10 @@ score_values = unique(X{1,1}(:)')'; % Find unique values
 score_zero = knnsearch(score_values,0); % Find the closest to zero
 rv = abs(score_values(score_zero)); % Regularization value for GMM 
 
+clear score_values score_zero 
+
 %% Clustering 
+save_pathname = uigetdir([],'Select a save location'); 
 
 for s = 1:2 % for active & inactive
     tic 
@@ -217,8 +245,7 @@ for s = 1:2 % for active & inactive
 end
 
 clear s 
-
-% Should save data here 
+save(strcat(save_pathname,'\','180513','.mat'),'-v7.3'); % save data  
 
 %% Post-Clustering Settings 
 
