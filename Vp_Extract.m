@@ -61,8 +61,8 @@ top_up = []; % alter to light boundaries where you topped up fish water.
     % E.g. Day 2 and 3 (top_up = [2 4]). 
     % E.g. Not topped up (top_up = []). 
 time_bins = 60*15; % Choose plot smoothing (from seconds) 
-days = [1 2 3 4]; % number of days  
-nights = [1 2 3]; % number of nights 
+days = [1 2]; % number of days  
+nights = [1]; % number of nights 
 
 % Colors 
 col = 'RedBlue'; % (***) 
@@ -475,7 +475,7 @@ delta_px_sq_scrap = diff(delta_px_sq_scrap); % Diff to find transitions
 % -1 = active to inactive
 
 for f = 1:size(delta_px_sq,2) % For each fish
-    % Note this this runs apporximately twice as fast as just using a
+    % Note this this runs apporximately twice as fast as using a
     % For loop
     
     % Starts - ensures no bouts are lost at the start
@@ -624,7 +624,7 @@ delta_px_sq_scrap = diff(delta_px_sq_scrap); % Diff to find transitions
     % 1 = inactive to active 
     % -1 = active to inactive 
  
-parfor f = 1:size(delta_px_sq,2) % For each fish 
+for f = 1:size(delta_px_sq,2) % For each fish 
         % Note this this runs apporximately twice as fast as just using a
         % For loop 
     
