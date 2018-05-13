@@ -36,8 +36,9 @@
     
 %% Options
     
-et = 2; % Analyse data as one experiment (1) or treat data seperatly (2) 
-ct = [2 3]; % days and nights of interest 
+et = 1; % Analyse repeats as one experiment (1) or treat repeats seperatly (2) 
+ct{1} = [2 3]; % days of interest 
+ct{2} = [2 3]; % nights of interest 
 ac = 1; % adjust color scheme (1) or not (2)  
 set(0,'DefaultFigureWindowStyle','docked'); % dock figures
 set(0,'defaultfigurecolor',[1 1 1]); % white background
@@ -221,8 +222,8 @@ end
 
 % Determine time windows
 % Selecting a time window
-days = ct; % days of interest 
-nights = ct; % nights of interest 
+days = ct{1}; % days of interest 
+nights = ct{2}; % nights of interest 
 time_window(1) = min([days_crop(days) nights_crop(nights)]);
 time_window(2) = max([days_crop(days) nights_crop(nights)]);
 
@@ -612,7 +613,8 @@ for p = 1:size(parameters,2) - 2 % For each parameter
                     cmap_2(col+1,:)+(1-cmap_2(col+1,:))*(1-(1/e^.5)),'showMM',2);
                 spread_cols{2}.LineWidth = 3; spread_cols{2}.Color = [1 0.5 0]; % Change marker properties
             end
-            
+            set(findall(gca,'type','line'),'markersize',15); % change marker sizes
+
             col = col + 2;
             
         end
@@ -749,7 +751,8 @@ for p = 1:size(parameters,2) - 2 % For each parameter
                     cmap_2(col+1,:)+(1-cmap_2(col+1,:))*(1-(1/e^.5)),'showMM',2);
                 spread_cols{2}.LineWidth = 3; spread_cols{2}.Color = [1 0.5 0]; % Change marker properties
             end
-            
+            set(findall(gca,'type','line'),'markersize',15); % change marker sizes
+
             col = col + 2;
             
         end
@@ -795,16 +798,19 @@ for t = time_window(1):time_window(2) % For each time window
 end 
 anova_time = anova_time(:)'; % Vectorise 
 
-if size(days_crop(days),2) == size(nights_crop(nights),2) &&... % If there are an equal number of windows 
-        size(days_crop(days),2) > 1 % & there is more than one day 
+if size(days_crop(days),2) == size(nights_crop(nights),2) &&... % If there are an equal number of windows
+        size(days_crop(days),2) > 1 % & there is more than one day
     anova_development = []; % development
-    anova_development = zeros(1,size(anova_group,2)); % Pre-allocate 
+    anova_development = zeros(1,size(anova_group,2)); % Pre-allocate
     d = 1:size(anova_development,2)/(size(time_window(1):time_window(2),2)/2):...
-        size(anova_development,2); % divide into "24h" windows 
-    for t = 1:size(d,2)-1 
-        anova_development(d(t):d(t+1)-1) = t; 
-    end 
-end 
+        size(anova_development,2); % divide into "24h" windows
+    for t = 1:size(d,2)-1
+        anova_development(d(t):d(t+1)-1) = t;
+    end
+    
+else
+    anova_development = ones(1,size(anova_group,2)); % allocate
+end
 
 % Calculations
 for p = 1:size(parameters,2)-2 % For each parameter
