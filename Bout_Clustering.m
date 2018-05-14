@@ -218,10 +218,10 @@ set(gca,'FontName','Calibri');
 
 %% Clustering Settings 
 load('D:\Behaviour\SleepWake\Re_Runs\Clustered_Data\Draft_1\Pre.mat', 'X'); % load X
-reps = 200; % set the number of repetitions
+reps = 100; % set the number of repetitions
 k_vals = 2:20; % set values of k (clusters) to try
-a_size = 50000; % number of points to check  
-s_vals = [10000,100000]; % min & max points to sample (uniformly)
+a_size = 40000; % number of probe points  
+s_vals = [40000,100000]; % min & max points to sample (uniformly)
 GMM_reps = 5; % number of GMM Models to fit per iteration 
 max_its = 1000; % number of GMM iterations (per repetition) 
 method = 'average'; % linkage measure 
@@ -248,6 +248,25 @@ for s = 1:2 % for active & inactive
 end
 
 clear s 
+
+%% Load Clustered Data  
+load('D:\Behaviour\SleepWake\Re_Runs\Clustered_Data\Draft_1\Pre.mat'); 
+active = load('D:\Behaviour\SleepWake\Re_Runs\Clustered_Data\Draft_1\180513_1.mat',...
+    'ea','idx','idx_cts','ea_links','ea_idx','th','sample_a','sample_a_n'); 
+inactive = load('D:\Behaviour\SleepWake\Re_Runs\Clustered_Data\Draft_1\180513_2.mat',...
+    'ea','idx','idx_cts','ea_links','ea_idx','th','sample_a','sample_a_n');
+
+% merge variables 
+ea{1,1} = active.ea; ea{2,1} = inactive.ea; 
+idx{1,1} = active.idx; idx{2,1} = inactive.idx; 
+idx_cts{1,1} = active.idx_cts; idx_cts{2,1} = inactive.idx_cts; 
+ea_links{1,1} = active.ea_links; ea_links{2,1} = inactive.ea_links; 
+ea_idx{1,1} = active.ea_idx; ea_idx{2,1} = inactive.ea_idx; 
+th(1,1) = active.th; th(2,1) = inactive.th; 
+sample_a{1,1} = active.sample_a; sample_a{2,1} = inactive.sample_a; 
+sample_a_n{1,1} = active.sample_a_n; sample_a_n{2,1} = inactive.sample_a_n; 
+
+clear active inactive
 
 %% Post-Clustering Settings 
 
