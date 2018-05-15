@@ -218,7 +218,7 @@ set(gca,'FontName','Calibri');
 
 %% Clustering Settings 
 load('D:\Behaviour\SleepWake\Re_Runs\Clustered_Data\Draft_1\Pre.mat', 'X'); % load X
-reps = 100; % set the number of repetitions
+reps = 200; % set the number of repetitions
 k_vals = 2:20; % set values of k (clusters) to try
 a_size = 40000; % number of probe points  
 s_vals = [40000,100000]; % min & max points to sample (uniformly)
@@ -243,7 +243,7 @@ for s = 1:2 % for active & inactive
         ea_links, ea_idx, ~, th, sample_a,sample_a_n] = ...
         gmm_sample_ea(X{s,1},reps,k_vals,a_size,s_vals,rv,GMM_reps,max_its,method,nn);
     toc 
-    save(strcat(save_pathname,'\','180513','_',num2str(s),'.mat'),'-v7.3'); % save data  
+    save(strcat(save_pathname,'\','180515','_',num2str(s),'.mat'),'-v7.3'); % save data  
     clear ea idx idx_cts ea_links ea_idx th sample_a sample_a_n
 end
 
@@ -251,9 +251,9 @@ clear s
 
 %% Load Clustered Data  
 load('D:\Behaviour\SleepWake\Re_Runs\Clustered_Data\Draft_1\Pre.mat'); 
-active = load('D:\Behaviour\SleepWake\Re_Runs\Clustered_Data\Draft_1\180513_1.mat',...
+active = load('D:\Behaviour\SleepWake\Re_Runs\Clustered_Data\Draft_1\180514_1.mat',...
     'ea','idx','idx_cts','ea_links','ea_idx','th','sample_a','sample_a_n'); 
-inactive = load('D:\Behaviour\SleepWake\Re_Runs\Clustered_Data\Draft_1\180513_2.mat',...
+inactive = load('D:\Behaviour\SleepWake\Re_Runs\Clustered_Data\Draft_1\180514_2.mat',...
     'ea','idx','idx_cts','ea_links','ea_idx','th','sample_a','sample_a_n');
 
 % merge variables 
