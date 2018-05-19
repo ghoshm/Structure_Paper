@@ -218,7 +218,6 @@ set(gca,'FontName','Calibri');
 
 %% Clustering Settings 
 load('D:\Behaviour\SleepWake\Re_Runs\Clustered_Data\Draft_1\Pre.mat', 'X'); % load X
-X{1,1} = X{1,1}(:,1:2); % Wake with 2d
 reps = 200; % set the number of repetitions
 k_vals = 2:20; % set values of k (clusters) to try
 a_size = 40000; % number of probe points  
@@ -252,9 +251,9 @@ clear s
 
 %% Load Clustered Data  
 load('D:\Behaviour\SleepWake\Re_Runs\Clustered_Data\Draft_1\Pre.mat'); 
-active = load('D:\Behaviour\SleepWake\Re_Runs\Clustered_Data\Draft_1\180516_1.mat',...
+active = load('D:\Behaviour\SleepWake\Re_Runs\Clustered_Data\Draft_1\180515_1.mat',...
     'ea','idx','idx_cts','ea_links','ea_idx','th','sample_a','sample_a_n'); 
-inactive = load('D:\Behaviour\SleepWake\Re_Runs\Clustered_Data\Draft_1\180516_2.mat',...
+inactive = load('D:\Behaviour\SleepWake\Re_Runs\Clustered_Data\Draft_1\180515_2.mat',...
     'ea','idx','idx_cts','ea_links','ea_idx','th','sample_a','sample_a_n');
 
 % merge variables 
@@ -322,15 +321,20 @@ for s = 1:2 % for active & inactive
     % Dendrogram
     subplot('position',[0.0500    0.8178    0.9000    0.1322]);
     [H,~,perm] = dendrogram(ea_links{s,1},size(ea{s,1},1),'colorthreshold',th(s,1)); % dendrogram
-    lineColours = cell2mat(get(H,'Color')); % get line colours 
-    colourList = unique(lineColours,'rows'); % find unique line colours (starts with black) 
     
-    for c = 2:size(colourList,1) % for each colour (excluding black) 
-        i = ismember(lineColours, colourList(c,:),'rows'); % find lines of this color (logical) 
-        lineColours(i, :) = repmat(cmap_cluster{s,1}(c-1,:),sum(i),1); % assign new color  
+    % Color Dendrogram By Cluster Colormap 
+    lineColours = cell2mat(get(H,'Color')); % get line colours
+    colourList = unique(lineColours,'rows'); % find unique line colours (starts with black)
+    for c = 2:size(colourList,1) % for each colour (excluding black)
+        i = ismember(lineColours, colourList(c,:),'rows'); % find lines of this color (logical)
+        scrap = cell2mat(get(H(i),'XData')); % find the points that these lines cover
+        scrap = scrap(:)'; % vectorise  
+        scrap = unique(scrap(floor(scrap) == scrap)); % keep unique whole data points
+        lineColours(i,:) = repmat(cmap_cluster{s,1}(mode(idx_numComp_sorted{s,1}...
+            (sample_a{s,1}(perm(scrap)))),:),sum(i),1); % assign new color
     end
-    for l = 1:size(H,1) % for each line 
-        set(H(l), 'Color', lineColours(l,:)); % set new color 
+    for l = 1:size(H,1) % for each line
+        set(H(l), 'Color', lineColours(l,:)); % set new color
     end
     axis off;
     
@@ -349,9 +353,20 @@ for s = 1:2 % for active & inactive
     c.FontSize = 16;
 end
 
-clear s H perm lineColours colourList c i l 
+clear s H perm lineColours colourList c i l scrap
 
 %% Bouts in PCA Space 
+% figure; box off; set(gca, 'Layer','top'); set(gca,'Fontsize',32); % Format
+% set(gca,'FontName','Calibri'); hold on; 
+%     
+% for c = numComp(1):-1:1
+%     scatter(X{1,1}(sample_a_n{1,1}(sample_a_n{1,1}(:,2) == c,1),1),...
+%         X{1,1}(sample_a_n{1,1}(sample_a_n{1,1}(:,2) == c,1),2),'marker','.',...
+%         'markerfacecolor',cmap_cluster{1,1}(c,:),...
+%         'markeredgecolor',cmap_cluster{1,1}(c,:),...
+%         'markerfacealpha',0.8,'markeredgealpha',0.8); 
+% 
+% end 
 
 % Options: 
     % sample 1000 for each cluster and do some sort of density plot 
