@@ -47,7 +47,8 @@ set(0,'defaultfigurecolor',[1 1 1]); % white background
 %% Load data (Post Bout_Clustering)
 
 % Load  
-load('D:\Behaviour\SleepWake\Re_Runs\Post_State_Space_Data\New\180111.mat');
+load('D:\Behaviour\SleepWake\Re_Runs\Post_State_Space_Data\Draft_1\180519.mat',...
+    '-regexp', '^(?!cells)\w'); % load data expect cells
 
 % Load Delta_px_sq data 
 for f = 1:size(filename,2) %For each file
@@ -58,6 +59,8 @@ end
     % Merges the active and inactive clusters into an alternating sequence per fish,
     % Also generates paired shuffled control data 
     % Slow, Roughly 3 hours for 629 fish, each with 10 shuffles 
+
+save_pathname = uigetdir([],'Select a save location'); % select save path 
 
 % Shuffles
 shuffles = 10; % hard coded number of shuffles
@@ -142,7 +145,7 @@ for f = 1:max(fish_tags{1,1}) % For each fish
     end
     
     % Report progress
-    if mod(f,100) == 0 % every 100 fish
+    if mod(f,10) == 0 % every 10 fish
         disp(horzcat('Threaded Fish ',num2str(f),' of ',...
             num2str(max(fish_tags{1,1})))); % Report progress
     end
@@ -153,11 +156,12 @@ toc
 clear f a b tc tw data scrap
 
 % Save Shuffled Data here 
+save(strcat(save_pathname,'\','180521','.mat'),'-v7.3'); % save data  
+clear save_pathname 
 
 %% Load Shuffled Data
 
-load('D:\Behaviour\SleepWake\Re_Runs\Threading\New\180220.mat',...
-    '-regexp', '^(?!cells)\w'); % except cells
+load('D:\Behaviour\SleepWake\Re_Runs\Threading\New\180220.mat'); 
 
 %% Filling in Data 
 tic
