@@ -396,12 +396,12 @@ clear s p k pd
 figure;
 counter = 1; % start a counter 
 for s = 1:2 % for active & inactive
-    for p = 1:size(cells{s,1},2) - 2 % For each parameter
+    for p = 3:size(cells{s,1},2) % For each parameter
         % Figure Settings
         subplot(2,4,counter); hold on;
         box off; set(gca,'Layer','top'); set(gca,'Fontsize',12); set(gca,'FontName','Calibri'); % Set Font
         if s ~= 2 % for active parameters 
-            title(parameters{1}{p}); % Add title
+            title(parameters{1}{p-2}); % Add title
         else % for inactive bout length 
             title(parameters{1}{10}); % Add title   
         end
@@ -409,27 +409,32 @@ for s = 1:2 % for active & inactive
         % Plot 
         crop = max(cells{s,1}(:,p)); 
         for k = 1:numComp(s) % for each cluster
-            plot((min(cells{s,1}(:,p)):crop)/unit_conversion{1}(s,p),...
-                parameter_dists{s,p}(k,:),'color',cmap_cluster{s,1}(k,:),'linewidth',3)
+            plot((min(cells{s,1}(:,p)):crop)/unit_conversion{1}(s,p-2),...
+                parameter_dists{s,p-2}(k,:),'color',cmap_cluster{s,1}(k,:),'linewidth',3)
         end
         
         % Axes 
-        set(gca,'XTick',...
-            [min(cells{s,1}(:,p))/unit_conversion{1}(s,p), (min(cells{s,1}(:,p))/unit_conversion{1}(s,p))*10,...
-            crop/unit_conversion{1}(s,p)]); % set x tick labels
-        
-        axis([min(cells{s,1}(:,p))/unit_conversion{1}(s,p) crop/unit_conversion{1}(s,p) ...
-            min(parameter_dists{s,p}(:)) max(parameter_dists{s,p}(:))]); % Set axis limits
+        try 
+            set(gca,'XTick',...
+                [min(cells{s,1}(:,p))/unit_conversion{1}(s,p-2), (min(cells{s,1}(:,p))/unit_conversion{1}(s,p-2))*10,...
+                crop/unit_conversion{1}(s,p-2)]); % set x tick labels
+        catch 
+            set(gca,'XTick',...
+                [min(cells{s,1}(:,p))/unit_conversion{1}(s,p-2), (crop/unit_conversion{1}(s,p-2))/2,...
+                crop/unit_conversion{1}(s,p-2)]); % set x tick labels
+        end 
+        axis([min(cells{s,1}(:,p))/unit_conversion{1}(s,p-2) crop/unit_conversion{1}(s,p-2) ...
+            min(parameter_dists{s,p-2}(:)) max(parameter_dists{s,p-2}(:))]); % Set axis limits
         
         % Set decimal places depending on units
-        if unit_conversion{1}(s,p) > 1
+        if unit_conversion{1}(s,p-2) > 1
             xtickformat('%.2f');
         else
             xtickformat('%.0f');
         end
         
         set(gca,'XScale','log'); % set log axis
-        xlabel(units{1}(p),'Fontsize',12); % X labels
+        xlabel(units{1}(p-2),'Fontsize',12); % X labels
         ylabel('Probability','Fontsize',12); % Y label
         
         counter = counter + 1; % add to counter 
@@ -450,6 +455,7 @@ for s = 1:2 % for active & inactive
             
             axis([0 max(numComp)+1 -1 2]);
             xlabel('Cluster Number','Fontsize',12); % X labels
+            set(gca,'XTick',1:max(numComp)); 
             set(gca,'YTick',[0 1]); 
             set(gca,'YTickLabels',{'Inactive','Active'},'Fontsize',12);
         end 
@@ -459,7 +465,8 @@ end
 
 clear counter s p crop k s_2
 
-%% Bout Proportions (slow...)
+%% Bout Proportions 
+    % 43 mins for 452 fish
 
 tic
 bout_proportions{1,1} = nan(max(fish_tags{1,1}),numComp(1),max(parameter_indicies{1,1}),...
@@ -470,7 +477,7 @@ bout_proportions{2,1} = nan(max(fish_tags{2,1}),numComp(2),max(parameter_indicie
 for s = 1:2 % for active & inactive  
     % note that comms overhead makes this faster as a for rather than a parfor loop  
     for f = 1:max(fish_tags{s,1}) % For each fish
-        for c = 1:numComp(s) % For each active bout type
+        for c = 1:numComp(s) % For each bout type
             for t = 1:max(parameter_indicies{s,1}(fish_tags{s,1}==f)) % For each time window that fish uses 
                 bout_proportions{s,1}(f,c,t) = sum(fish_tags{s,1}==f & idx_numComp_sorted{s,1}==c ...
                     & parameter_indicies{s,1}==t)/...
