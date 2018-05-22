@@ -413,7 +413,7 @@ for er = 1 % for the WT experiments
         set(gca,'XTickLabels',bp_order(s,:),'Fontsize',32);
         ylabel('Probability','Fontsize',32);
         
-        if er == 1 && s == 1
+        if er == 1 && s == 2
             scrap = get(gca,'Children');
             [~,icons,plots,~] = legend([scrap(end) scrap(2)],'Day','Night',...
                 'location','northeast');
@@ -617,7 +617,7 @@ ylabel('Delta Px','Fontsize',32);
 
 clear b bs_l b scrap
 
-%% Save data here 
+%% Save data here (180522) 
 
 %% -> Legion Compression 
 
