@@ -58,7 +58,7 @@ end
 %% Threading With Multiple Shuffles of Data 
     % Merges the active and inactive clusters into an alternating sequence per fish,
     % Also generates paired shuffled control data 
-    % Slow, Roughly 3 hours for 629 fish, each with 10 shuffles 
+    % Slow, Roughly 1 hour for 452 fish, each with 10 shuffles 
 
 save_pathname = uigetdir([],'Select a save location'); % select save path 
 
@@ -157,11 +157,11 @@ clear f a b tc tw data scrap
 
 % Save Shuffled Data here 
 save(strcat(save_pathname,'\','180521','.mat'),'-v7.3'); % save data  
-clear save_pathname 
 
 %% Load Shuffled Data
 
-load('D:\Behaviour\SleepWake\Re_Runs\Threading\New\180220.mat'); 
+load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\180521.mat'); 
+clear save_pathname 
 
 %% Filling in Data 
 tic
@@ -415,7 +415,8 @@ for er = 1 % for the WT experiments
         
         if er == 1 && s == 1
             scrap = get(gca,'Children');
-            [~,icons,plots,~] = legend([scrap(end) scrap(2)],'Day','Night');
+            [~,icons,plots,~] = legend([scrap(end) scrap(2)],'Day','Night',...
+                'location','northeast');
             legend('boxoff'); set(plots(1:2,1),'MarkerSize',15); set(icons(1:2),'Fontsize',32) ;
         end
     end
@@ -518,16 +519,16 @@ clear er set_token s g legend_lines l_mean l_std l_top icons plots a r
     % Note: 180509 - should add transparency to scatter plot 
     
 % 2D Scatter Plot 
-figure; cols = 1;
-for c = min(idx_numComp_sorted{1,1}):max(idx_numComp_sorted{1,1}) % for each active cluster 
-    scatter(sample(sample_tags==c,1),sample(sample_tags==c,2),18,...
-        'markerfacecolor',cmap_cluster{1,1}(cols,:),...
-        'markeredgecolor','k');
-    cols = cols + 1;
-    hold on; 
-end
-
-clear c cols 
+% figure; cols = 1;
+% for c = min(idx_numComp_sorted{1,1}):max(idx_numComp_sorted{1,1}) % for each active cluster 
+%     scatter(sample(sample_tags==c,1),sample(sample_tags==c,2),18,...
+%         'markerfacecolor',cmap_cluster{1,1}(cols,:),...
+%         'markeredgecolor','k');
+%     cols = cols + 1;
+%     hold on; 
+% end
+% 
+% clear c cols 
 
 %% Bout Shapes Data 
  
@@ -539,7 +540,7 @@ fish_tags_cm = cumsum(fish_tags_cm); % cumulative number of fish across experime
 
 clear er  
 
-%% Sampling from a single fish 
+%% Sampling from a single WT fish 
     % Note: 180509 - an alternative may be to plot the sample_a bouts? 
 
 sample_size = 100; % hard coded sample size 
@@ -589,47 +590,34 @@ end
 clear a f c counter sample b 
 
 %% Bout Shapes Figure
-    % Note 180509: I think that the best figure may just be the old one 
-    % x = time, y = delta_px, one axis then overlay bouts 
-    
-% Plotting variables 
-for b = 1:size(bouts,2) % for each cluster 
-    bs_top(b) = max(bouts{1,b}(:)); % find the max value 
-    bs_l(b) = size(bouts{1,b},2); % find the max length 
+% Note 180509: I think that the best figure may just be the old one
+% x = time, y = delta_px, one axis then overlay bouts
+
+% Plotting variables
+for b = 1:size(bouts,2) % for each cluster
+    bs_l(b) = size(bouts{1,b},2); % find the max length
 end
 
-bs_top = max(bs_top) + (max(bs_top)*0.05); % add a bit of space
-bs_l = max(bs_l); % max length 
+bs_l = max(bs_l); % max length
 
 figure; hold on; set(gca,'FontName','Calibri');
-for b = 1:size(bouts,2) % for each active bout type
-    
-    % Padding
-    plot([zeros(size(bouts{1,b},1),1) bouts{1,b} zeros(size(bouts{1,b},1),1)]' + bs_top*(b-1),...
-        'color',cmap_cluster{1,1}(b,:)+(1-cmap_cluster{1,1}(b,:))*(1-(1/(1)^.5)));
-    scrap = nanmean(bouts{1,b}); scrap(scrap < 1) = [];
-    plot([0 scrap 0]' + bs_top*(b-1),...
-        'k','linewidth',3);
-    
-    %     % No padding
-    %     plot((bouts{1,b}' + bs_top*(b-1)),'color',...
-    %         cmap_cluster{1,1}(b,:)+(1-cmap_cluster{1,1}(b,:))*(1-(1/(1)^.5)));
-    
-    plot([1 bs_l + 2],[bs_top*(b-1) bs_top*(b-1)],'k','linewidth',1);
-    
+for b = 1:size(bouts,2) % for each bout type 
+    shadedErrorBar(1:(size(bouts{1,b},2)+2),...
+        nanmean([zeros(size(bouts{1,b},1),1) bouts{1,b} zeros(size(bouts{1,b},1),1)]),...
+        nanstd([zeros(size(bouts{1,b},1),1) bouts{1,b} zeros(size(bouts{1,b},1),1)])/sqrt(size(bouts{1,1},1)),...
+        'lineProps',{'Color',cmap_cluster{1,1}(b,:),'LineWidth',3});
 end
 
 box off; set(gca,'Layer','top'); set(gca,'Fontsize',32);
-axis([1 bs_l 0 bs_top*(size(bouts,2))]); % hard coded
-set(gca,'XTick',2:2:bs_l); 
+axis([1 bs_l ylim]);
+set(gca,'XTick',2:2:bs_l);
 set(gca,'XTickLabels',{(round((1:2:bs_l)/fps{1},2,'decimals'))}); % hard coded
 xlabel('Time (seconds)','Fontsize',32);
-set(gca,'YTick',[]); 
 ylabel('Delta Px','Fontsize',32);
 
-clear b bs_top bs_l b scrap 
+clear b bs_l b scrap
 
-% Save data here 
+%% Save data here 
 
 %% -> Legion Compression 
 
