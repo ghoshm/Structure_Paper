@@ -621,9 +621,9 @@ clear b bs_l b scrap
 
 %% -> Legion Compression 
 
-load('D:\Behaviour\SleepWake\Re_Runs\Threading\New\180223.mat'); 
-load('D:\Behaviour\SleepWake\Re_Runs\Threading\New\Compression_Results_Final.mat',...
-    'gTermCell'); 
+load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\180522.mat'); 
+load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\Compression_Results_Final.mat',...
+    'gTermCell','totSavings'); 
 
 %% Sequence Lengths 
 
@@ -653,18 +653,16 @@ end
 clear tc f s sq_l pd 
 
 %% Sequence Lengths Figure
-    % Note 180509:
-    % Should prehaps add an error bar or something? 
-    % Should add comparison statistics
     
 clear legend_lines; 
 figure; box off; set(gca, 'Layer','top'); hold on; 
 set(gca,'FontName','Calibri'); set(gca,'Fontsize',32); % Format
-for tc = 2:size(seq_lengths_pd,3) % for each shuffle 
-    legend_lines(2) = plot(2:(size(seq_lengths_pd,2)+1),...
-        nanmean(seq_lengths_pd(:,:,tc)),...
-        'color','k','linewidth',5); % plot an average  
-end
+plotSpread(squeeze(nanmean(seq_lengths_pd(:,:,2:end)))',...
+    'Xvalues',2:(size(seq_lengths_pd,2)+1),'distributionColors','k'); 
+set(findall(gca,'type','line'),'markersize',9); % change marker sizes
+legend_lines(2) = plot(2:(size(seq_lengths_pd,2)+1),...
+    nanmean(nanmean(seq_lengths_pd(:,:,2:end)),3),...
+    'k','linewidth',5); 
 legend_lines(1) = plot(2:(size(seq_lengths_pd,2)+1),...
     nanmean(seq_lengths_pd(:,:,1)),...
     'color',cmap{1,1},'linewidth',5); % plot the real data
@@ -675,6 +673,8 @@ legend_lines(1) = plot(2:(size(seq_lengths_pd,2)+1),...
 legend('boxoff'); set(icons(1:size(legend_lines,1)),'Fontsize',32) ; set(plots,'LineWidth',5);
 xlabel('Motif Length','Fontsize',32); ylabel('Probability','Fontsize',32); % Y Labels
 axis([2 (size(seq_lengths_pd,2)+1) ylim]); 
+
+clear legend_lines icons plots 
 
 %% Constructing a common Grammar 
     % Roughly 1 minute per shuffle (629 fish)
@@ -737,6 +737,101 @@ xlabel('Position in Motif','Fontsize',32);
 ylabel('Motif','Fontsize',32);
 
 clear ax grammar_mat_sorted c 
+
+%% Compressibility 
+% The compressibility of a sequence of uncompressed length l is given by the sum of the savings S 
+% at each iteration divided by l (Gomez-Marin et al.,2016) 
+
+compressibility = zeros(size(totSavings),'single'); % fish x t/c
+
+for f = 1:size(threads,1) % for each fish 
+    compressibility(f,:) = totSavings(f,:)/size(threads{f,1,1},1); % calculate compressibility 
+end 
+
+clear f 
+
+%% Compressibility Figure 
+er = 1; % for the WT fish 
+
+figure;
+% Compressibility 
+subplot(1,2,1);
+set_token = find(experiment_reps == er,1,'first'); % settings
+counter = 1; % counts groups for plots
+hold on; set(gca,'FontName','Calibri'); clear scrap;
+
+for g = 1:max(i_group_tags(i_experiment_reps == er)) % for each group
+    clear data;
+    data = [repmat(compressibility(i_experiment_reps == er & i_group_tags == g,1),(size(compressibility,2)-1),1) ...
+        reshape(compressibility(i_experiment_reps == er & i_group_tags == g,2:end),[],1)];
+    plot([counter,counter+1],data,...
+        'color',cmap{set_token}(g,:)+(1-cmap{set_token}(g,:))*(1-(1/(5)^.5)),'linewidth',1.5);
+    errorbar([counter,counter+1],nanmean(data),nanstd(data),...
+        'color',cmap{set_token}(g,:),'linewidth',3);
+    counter = counter + 2; % add to counter
+    
+    scrap(1,g) = min(min(compressibility(i_experiment_reps == er & i_group_tags == g,:)));
+    scrap(2,g) = max(max(compressibility(i_experiment_reps == er & i_group_tags == g,:)));
+end
+
+box off; set(gca, 'Layer','top'); set(gca,'Fontsize',32); % Format
+if er == 1 % for the WT Data
+    set(gca, 'XTick', [1 2]); % set X-ticks
+    set(gca,'XTickLabels',{'Data','Shuffled'}); % X Labels
+else % for the other experiments
+    set(gca,'XTickLabels',geno_list{set_token}.colheaders); % X Labels
+end
+ylabel('Compressibility','Fontsize',32); % Y Labels
+axis([.5 (max(i_group_tags(i_experiment_reps == er))*2)+1 ...
+    (min(scrap(1,:)) - (min(scrap(1,:))*0.05)) (max(scrap(2,:)) + (max(scrap(2,:))*0.05))]);
+
+% Insert 
+axes('Position',[0.4 0.5 0.1 0.4]); hold on; 
+box off; set(gca, 'Layer','top'); set(gca,'Fontsize',16); set(gca,'FontName','Calibri'); % Set Font
+spread_cols = plotSpread(compressibility(i_experiment_reps == er,1) - ...
+    nanmean(compressibility(i_experiment_reps == er,2:end),2),...
+    'distributionColors',cmap{1}(1,:),'showMM',2);
+spread_cols{2}.LineWidth = 3; spread_cols{2}.Color = [1 0.5 0]; % Change marker properties
+set(findall(gca,'type','line'),'markersize',15); % change
+ylabel('? Compressibility'); 
+set(gca,'XTick',[]); 
+
+% Compressibility vs Sequence Length 
+subplot(1,2,2); 
+hold on; set(gca,'FontName','Calibri'); 
+scatter(cellfun(@length,threads(i_experiment_reps == er,1,1)),...
+    compressibility(i_experiment_reps == er,1),90,...
+    'markerfacecolor',cmap{1}(1,:),'markeredgecolor',cmap{1}(1,:),...
+    'markerfacealpha',0.5)
+box off; set(gca, 'Layer','top'); set(gca,'Fontsize',32); % Format
+xlabel({'Uncompressed' ; 'Sequence Length'},'Fontsize',32); 
+axis([minmax(cellfun(@length,threads(i_experiment_reps == er,1,1))')...
+    (min(scrap(1,:)) - (min(scrap(1,:))*0.05)) (max(scrap(2,:)) + (max(scrap(2,:))*0.05))]);
+
+clear er set_token counter g data scrap spread_cols 
+
+%% Compressibility N-Way Anova
+
+er = 1; % for the WT fish 
+
+% Grouping Variables
+anova_group = repmat(i_group_tags(i_experiment_reps==er),...
+    [size(threads,3),1])'; % groups
+anova_tc = ones(size(anova_group)); % real (0) vs shuffled data (1)
+anova_tc(1:size(i_group_tags(i_experiment_reps==er),1)) = 0;
+anova_experiment = repmat(i_experiment_tags(i_experiment_reps==er),...
+    [size(threads,3),1])'; % experiments
+
+% Data to Compare
+data = compressibility(i_experiment_reps==er,:); % grab data
+data = data(:)'; % vectorise
+
+% Comparison
+[twa.compress.p{1,er},~,twa.compress.stats{1,er}] = anovan(data,...
+    {anova_group,anova_tc,anova_experiment},...
+    'display','off','model','full');
+
+clear er anova_group anova_tc anova_experiment data
 
 %% -> Legion Motif Frequency Calculations  
     % Note 180509 - you can remove this if uniqueSeqs is already single 
