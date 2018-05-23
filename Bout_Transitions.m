@@ -841,6 +841,8 @@ for s = 1:size(uniqueSeqs{1,1},1) % for each sequence
     uniqueSeqs{1,1}{s,1} = single(uniqueSeqs{1,1}{s,1}); % convert to single
 end
 
+%% Save data 
+
 %% Load & Reformat Legion Data  
 load('D:\Behaviour\SleepWake\Re_Runs\Threading\New\Grammar_Results_Final.mat',...
     'gCount_norm');
