@@ -841,11 +841,14 @@ for s = 1:size(uniqueSeqs{1,1},1) % for each sequence
     uniqueSeqs{1,1}{s,1} = single(uniqueSeqs{1,1}{s,1}); % convert to single
 end
 
-%% Save data 
+%% Save data (180523)
+load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\180523.mat', 'uniqueSeqs'); 
+uniqueSeqs(2:end) = [];
+% save uniqueSeqs 
 
 %% Load & Reformat Legion Data  
-load('D:\Behaviour\SleepWake\Re_Runs\Threading\New\Grammar_Results_Final.mat',...
-    'gCount_norm');
+load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\Grammar_Results_Final.mat',...
+    'gCount_norm'); 
 
 temp = gCount_norm; clear gCount_norm; 
 
@@ -877,8 +880,6 @@ end
 clear temp tc scrap inf_r f
 
 %% Real vs Shuffled Z-Scores Pdf (Rounded) 
-    % Note: 180313 - may be interesting to compare Kurtosis? 
-    % Note: 180406 - Sum from lower values onwards 
     
 for tc = 1:size(gCount_norm,2) % for each shuffle
     tb(:,tc) = minmax(round(gCount_norm{1,tc}(:)')); % find it's max & min z-score
@@ -915,19 +916,21 @@ toc
 
 clear tc f data pd
 
-%% Calculate Skewness 
-    % Note 180509 - the most relevant comparison is each fishs skewness vs 
-    % its paired shuffled control data
-    % A "matchstick" figure would be good too 
-    
-skewness(tc_pdf(f,:,tc)'); 
+%% Calculate Kurtosis 
+% https://stats.stackexchange.com/questions/126346/why-kurtosis-of-a-normal-distribution-is-3-instead-of-0
+   
+tc_pdf_binned_k = nan(size(tc_pdf_binned,1),size(tc_pdf_binned,3),'single'); 
+for f = 1:size(tc_pdf_binned,1) % for each fish 
+    tc_pdf_binned_k(f,:) = squeeze(kurtosis(tc_pdf_binned(f,:,:),1,2)); 
+end 
+
+clear f 
 
 %% Load Data
 gCount_norm(:,2:end) = []; % remove excess shuffled data 
-load('D:\Behaviour\SleepWake\Re_Runs\Threading\New\180227.mat'); 
+load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\180523.mat'); 
 
 %% Real vs Shuffled Z-Scores Figure 
-    % Note: 180406 - Sum from lower values onwards 
 
 er = 1; % for the WT data 
 set_token =  find(experiment_reps == er,1,'first'); % settings
@@ -949,10 +952,47 @@ axis tight
 set(gca,'FontName','Calibri'); box off; set(gca,'Layer','top'); set(gca,'Fontsize',32);
 set(gca,'XTick',-4:2:4)
 xlabel('Z-Score'); ylabel('Probability'); 
-legend(legend_lines,'Real Data','Shuffled Data'); 
+legend(legend_lines,'Real Data','Shuffled Data','location','northwest'); 
 legend('boxoff'); 
 
 % Note: Remember to add in greater & less than symols to the ends 
+
+% Kurtosis Insert 
+axes('Position',[0.8 0.5 0.1 0.4]); hold on; 
+box off; set(gca, 'Layer','top'); set(gca,'Fontsize',16); set(gca,'FontName','Calibri'); % Set Font
+data = [repmat(tc_pdf_binned_k(i_experiment_reps == er,1),(size(tc_pdf_binned_k,2)-1),1) ...
+    reshape(tc_pdf_binned_k(i_experiment_reps == er,2:end),[],1)];
+plot([1,2],data,...
+    'color',cmap{set_token}(1,:)+(1-cmap{set_token}(1,:))*(1-(1/(5)^.5)),'linewidth',1.5);
+errorbar([1,2],nanmean(data),nanstd(data),...
+    'color',cmap{set_token}(1,:),'linewidth',3);
+axis([.5 2.5 min(data(:))-(min(data(:))*0.025) max(data(:))+(max(data(:))*0.025)]); 
+set(gca,'XTickLabel',{'Real','Shuffled'},'Fontsize',16); 
+ylabel('Kurtosis','Fontsize',16); 
+
+clear er set_token tc legend_lines data 
+
+%% Kurtosis Stats 
+er = 1; % for the WT fish 
+
+% Grouping Variables
+anova_group = repmat(i_group_tags(i_experiment_reps==er),...
+    [size(threads,3),1])'; % groups
+anova_tc = ones(size(anova_group)); % real (0) vs shuffled data (1)
+anova_tc(1:size(i_group_tags(i_experiment_reps==er),1)) = 0;
+anova_experiment = repmat(i_experiment_tags(i_experiment_reps==er),...
+    [size(threads,3),1])'; % experiments
+
+% Data to Compare
+data = tc_pdf_binned_k(i_experiment_reps==er,:); % grab data
+data = data(:)'; % vectorise
+
+% Comparison
+[twa.kurtosis.p{1,er},~,twa.kurtosis.stats{1,er}] = anovan(data,...
+    {anova_group,anova_tc,anova_experiment},...
+    'display','off','model','full');
+
+clear er anova_group anova_tc anova_experiment data
 
 %% Identifying Interesting Sequences (is)
 
@@ -988,7 +1028,7 @@ for er = 1:max(experiment_reps) % for each experiment repeat
         mRMR_tw{er,1} = ones(size(mRMR_data{er,1},1),1)*2; 
         mRMR_tw{er,1}(1:size(mRMR_data{er,1},1)/2) = 1; % day (1) vs night (2) 
         
-        %mRMR_data{er,1}(mRMR_data{er,1} < 0) = 0; % Remove negative values for now
+        mRMR_data{er,1}(mRMR_data{er,1} < 0) = 0; % Remove negative values for now
         
     else
         % Organised to be:
@@ -1054,18 +1094,19 @@ end
 clear er set_token s Mdl
 
 %% Sorted Raw Data Example
-    % Note 180509 - change sorting to be:
-        % Motifs: sort by average day minus average night 
-        % Fish (seperatly day/night) 
-        
+    % Sorts by 
+        % Motifs (average day - night)
+        % Fish (seperatly day and night) 
+    
 er = 1; % settings 
-set_token =  find(experiment_reps == er,1,'first'); % settings
+set_token = find(experiment_reps == er,1,'first'); % settings
 clear scrap data; 
 scrap =  double([reshape(gCount_norm{1,1}(:,days_crop{set_token}(days{set_token}),...
             i_experiment_reps==er),size(grammar_mat{1,1},1),[])' ; ...
             reshape(gCount_norm{1,1}(:,nights_crop{set_token}(nights{set_token}),...
             i_experiment_reps==er),size(grammar_mat{1,1},1),[])']); 
-scrap = sortrows(scrap','descend','ComparisonMethod','auto')'; % sort motifs   
+[~,O] = sort(nanmean(scrap(1:size(scrap,1)/2,:)) - nanmean(scrap((size(scrap,1)/2)+1:end,:)),'descend'); 
+scrap = scrap(:,O); % sort by motifs 
 data = [sortrows(scrap(1:(size(scrap,1)/2),:),'descend'); ...
     sortrows(scrap(((size(scrap,1)/2)+1):end,:),'descend')]; % sort fish (seperatly day/night)
 figure; 
@@ -1090,7 +1131,7 @@ set(gca,'YTick',[size(mRMR_data{er,1},1)/4 size(mRMR_data{er,1},1)*(3/4)]);
 set(gca,'YTickLabels',{'Day' ; 'Night'},'Fontsize',32); 
 ylabel('Fish ID','Fontsize',32); 
 
-clear er set_token data n CT c 
+clear er set_token scrap data n CT c O  
 
 %% Model Loss Figure 
 er = 1; % settings 
@@ -1124,7 +1165,7 @@ clear er set_token data a b
     % classification between groups 
     
 figure;
-er = 5; % set interest 
+er = 4; % set interest 
 set_token =  find(experiment_reps == er,1,'first'); % settings
 clear scrap; counter = 1; % start a counter 
 scrap = nan(max(mRMR_tw{er,1}),max(mRMR_tw{er,1}),'single'); % groups x groups 
@@ -1244,7 +1285,7 @@ clear er set_token scrap ax c s data g icons plots
     % data is paired 
     
 % Settings
-er = 1; % set experiment of interest  
+er = 4; % set experiment of interest  
 s = comps_v{er,1}(1,1); % choose sequence of interest
 set_token =  find(experiment_reps == er,1,'first'); % settings 
 sep = [0 0.75/2]; % day/night spread 
