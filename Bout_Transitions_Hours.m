@@ -65,7 +65,7 @@ end
 clear e gap edges
 
 %% Threading Every Hour With Multiple Shuffles of Data 
-% Very Slow, Roughly 16 hours for 629 fish, each with 10 shuffles 
+% Very Slow, Roughly 7 hours for 452 fish, each with 10 shuffles 
 % Note that I'm now keeping only the real time windows
 % Rather than storing multiple copies of these (which are redundant)
 
@@ -261,9 +261,10 @@ for g = 1:max(i_group_tags(i_experiment_reps == er)) % for each group
         scrap(2,g) = max(nanmean(data) + nanstd(data)); 
     end
     
-    errorbar(nanmean(data),nanstd(data),...
+    legend_lines(g) = errorbar(nanmean(data),nanstd(data),...
         'color',cmap{set_token}(g,:),'linewidth',3);
-    
+    legend_cell{g} = horzcat(geno_list{set_token}.colheaders{g},', n = ',...
+            num2str(size(data,1)));
 end
 
 y_lims = [(min(scrap(1,:)) - min(scrap(1,:))*0.05) ...
@@ -283,14 +284,21 @@ box off; set(gca, 'Layer','top'); set(gca,'Fontsize',32); % Format
 xlabel('Time (Hours)','Fontsize',32); % X Labels 
 ylabel('Compressibility','Fontsize',32); % Y Labels
 axis([1 (n*24) y_lims]); 
+if er == 1 % for the WT data
+   [~,icons,plots,~] = legend(legend_lines,legend_cell,'Location','northwest');
+else
+   [~,icons,plots,~] = legend(legend_cell,'Location','northeast');
+end
+legend('boxoff'); 
+set(icons(1:g),'Fontsize',32) ; set(plots,'LineWidth',3);
 
-clear er set_token g data scrap y_lims a night_start n r 
+clear et set_token g data scrap legend_lines legend_cell y_lims a night_start n r icons plots   
 
 %% Compressibility Day vs Night 
 figure;
 for er = 1:max(experiment_reps) % for each group of experiments
     set_token = find(experiment_reps == er,1,'first'); % settings
-    subplot(2,3,er); counter = 1; % counts groups for plots
+    subplot(2,2,er); counter = 1; % counts groups for plots
     hold on; set(gca,'FontName','Calibri'); clear scrap;
     
     for g = 1:max(i_group_tags(i_experiment_reps == er)) % for each group
@@ -314,6 +322,7 @@ for er = 1:max(experiment_reps) % for each group of experiments
         set(gca, 'XTick', [1 2]); % set X-ticks
         set(gca,'XTickLabels',{'Day','Night'}); % X Labels
     else % for the other experiments 
+        set(gca,'XTick',1.5:2:(max(i_group_tags(i_experiment_reps == er))*2)+.5);
         set(gca,'XTickLabels',geno_list{set_token}.colheaders); % X Labels
     end
     ylabel('Compressibility','Fontsize',32); % Y Labels
@@ -376,6 +385,8 @@ for er = 1:max(experiment_reps) % for each group of experiments
 end
 
 clear er anova_group anova_experiment anova_time t anova_development d data
+
+% Saved as (180525_Hours) 
 
 %% -> Legion 
 
