@@ -391,7 +391,8 @@ clear er anova_group anova_experiment anova_time t anova_development d data
 %% -> Legion 
 
 % load grammar freq data 
-load('D:\Behaviour\SleepWake\Re_Runs\Threading\New\Grammar_Hours_Results_Final.mat','gCount_norm');
+load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\Grammar_Hours_Results_Final.mat',...
+    'gCount_norm');
 
 % variables 
 dn_hour = ones(1,size(gCount_norm{1,1},2))*2; % day and night hours 
@@ -430,9 +431,9 @@ clear temp tc scrap inf_r f shuffles
 
 %% Load threaded data 
     % Note 180509 - double check what workspace to load from here
-    
-load('D:\Behaviour\SleepWake\Re_Runs\Threading\New\180227.mat',...
-    '-regexp', '^(?!states|raw_data)\w'); % except states & raw data 
+
+load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\180525_Hours.mat');
+load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\180523.mat', 'grammar_mat');
 
 %% Identifying Interesting Sequences (is)
 
@@ -591,7 +592,7 @@ end
 % Best motif for each hour 
 scrap = gCount_norm{1,1}(comps_v{er,1}(:,1),:,i_experiment_reps == er);
 
-% 
+% Figure 
 figure; hold on; 
 for g = 1:max(mRMR_tw{er,1}) % for each group 
     plot(nanmean(scrap(g,:,:),3),'color',CT(g,:));
@@ -612,13 +613,27 @@ plot((nanmean(data) - min(nanmean(data)))./range(nanmean(data)),'color',CT(g,:),
     pause(3);
 end
 
-% Example Figure 
-g = 1; 
+%% Startle Motifs  
+er = 1; 
+set_token = find(experiment_reps == er,1,'first'); % settings
+
+s = comps_v{er,1}(1,1); 
+idx = knnsearch(nanmean(gCount_norm{1,1}(:,:,i_experiment_reps == er),3),...
+    nanmean(gCount_norm{1,1}(s,:,i_experiment_reps == er),3),...
+    'K',10);
+
+scrap = gCount_norm{1,1}(idx,:,i_experiment_reps == er);
+scrap_cmap = flip(brewermap(length(idx),'YlOrRd')); 
+
+%% Startle Figure 
 figure; hold on; set(gca,'FontName','Calibri'); box off; 
-data = [squeeze(scrap(g,1:24,:))' ; squeeze(scrap(g,25:end,:))'];
-errorbar(nanmean(data),nanstd(data)/sqrt(size(scrap,3)),...
-    'color',cmap{er}(1,:),'linewidth',3);
-y_lims = ylim; 
+for s = 1:length(idx)
+    data = [squeeze(scrap(s,1:24,:))' ; squeeze(scrap(s,25:end,:))'];
+    errorbar(nanmean(data),nanstd(data)/sqrt(size(scrap,3)),...
+        'color',scrap_cmap(s,:),'linewidth',3);
+end
+
+y_lims = ylim;
 
 % Night Patches
 a = 1; night_start = 15; % hard coded counter
@@ -633,3 +648,29 @@ box off; set(gca, 'Layer','top'); set(gca,'Fontsize',32); % Format
 xlabel('Time (Hours)','Fontsize',32); % X Labels 
 ylabel('Z-Score','Fontsize',32); % Y Labels
 axis([1 (n*24) y_lims]); 
+
+% Insert 
+ax1 = axes('Position',[0.8 0.5 0.1 0.4]); hold on; 
+box off; set(gca, 'Layer','top'); set(gca,'Fontsize',16); set(gca,'FontName','Calibri'); % Set Font
+set(gca,'Ydir','reverse'); 
+set(gca,'color','none'); 
+
+% Motifs
+clear scrap;
+scrap = grammar_mat{1,1}(idx,:); % grab motifs
+scrap(:,sum(isnan(scrap)) == size(scrap,1)) = [];
+ax = imagesc(scrap,'AlphaData',isnan(scrap)==0); % imagesc with nan values in white
+colormap([cmap_cluster{2,1} ; cmap_cluster{1,1}]); % merged colormap
+set(ax,'CDataMapping','direct');
+xlabel('Position in Motif','Fontsize',16);
+ylabel('Motif','Fontsize',16);
+ax1.XRuler.Axle.LineStyle = 'none';
+ax1.YRuler.Axle.LineStyle = 'none';
+set(ax1,'XTick',[]); set(ax1,'YTick',[]); 
+
+% Labels 
+for s = 1:length(idx)
+    errorbar(0,s,.25,'color',scrap_cmap(s,:),'linewidth',3)
+end 
+ 
+clear er set_token s idx scrap scrap_cmap data y_lims a night_start n r ax1 ax    
