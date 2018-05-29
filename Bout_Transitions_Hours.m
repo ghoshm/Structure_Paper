@@ -430,7 +430,6 @@ end
 clear temp tc scrap inf_r f shuffles
 
 %% Load threaded data 
-    % Note 180509 - double check what workspace to load from here
 
 load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\180525_Hours.mat');
 load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\180523.mat', 'grammar_mat');
@@ -627,7 +626,7 @@ scrap_cmap = flip(brewermap(length(idx),'YlOrRd'));
 
 %% Startle Figure 
 figure; hold on; set(gca,'FontName','Calibri'); box off; 
-for s = 1:length(idx)
+for s = length(idx):-1:1
     data = [squeeze(scrap(s,1:24,:))' ; squeeze(scrap(s,25:end,:))'];
     errorbar(nanmean(data),nanstd(data)/sqrt(size(scrap,3)),...
         'color',scrap_cmap(s,:),'linewidth',3);
