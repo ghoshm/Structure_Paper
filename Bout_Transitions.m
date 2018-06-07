@@ -590,9 +590,8 @@ end
 clear a f c counter sample b 
 
 %% Bout Shapes Figure
-% Note 180509: I think that the best figure may just be the old one
-% x = time, y = delta_px, one axis then overlay bouts
 
+% Active Shapes 
 % Plotting variables
 for b = 1:size(bouts,2) % for each cluster
     bs_l(b) = size(bouts{1,b},2); % find the max length
@@ -600,12 +599,14 @@ end
 
 bs_l = max(bs_l); % max length
 
-figure; hold on; set(gca,'FontName','Calibri');
+figure;
+subplot(1,2,1); hold on; set(gca,'FontName','Calibri');
 for b = 1:size(bouts,2) % for each bout type 
     shadedErrorBar(1:(size(bouts{1,b},2)+2),...
         nanmean([zeros(size(bouts{1,b},1),1) bouts{1,b} zeros(size(bouts{1,b},1),1)]),...
         nanstd([zeros(size(bouts{1,b},1),1) bouts{1,b} zeros(size(bouts{1,b},1),1)])/sqrt(size(bouts{1,1},1)),...
         'lineProps',{'Color',cmap_cluster{1,1}(b,:),'LineWidth',3});
+
 end
 
 box off; set(gca,'Layer','top'); set(gca,'Fontsize',32);
@@ -615,6 +616,63 @@ set(gca,'XTickLabels',{(round((1:2:bs_l)/fps{1},2,'decimals'))}); % hard coded
 xlabel('Time (seconds)','Fontsize',32);
 ylabel('Delta Px','Fontsize',32);
 
+% Legend 
+ax1 = axes('Position',[0.35 0.5 0.1 0.4]); hold on; 
+box off; set(gca,'Layer','top'); set(gca,'Fontsize',12); set(gca,'FontName','Calibri'); % Set Font
+title('Legend');
+s_2 = 2; 
+for k = 1:numComp(s_2) % for each cluster
+    scatter(k,mod(s_2,2),300,...
+        'markerfacecolor',cmap_cluster{s_2,1}(k,:),...
+        'markeredgecolor',cmap_cluster{s_2,1}(k,:));
+end
+
+axis tight 
+xlabel('Module Number','Fontsize',12); % X labels
+set(gca,'XTick',1:max(numComp));
+set(gca,'YTick',[0 1]);
+set(gca,'YTickLabels',{'Inactive','Active'},'Fontsize',12);
+% Inactive Module Fits 
+% Figure Settings
+s = 2; p = 3; 
+subplot(1,2,2); hold on;
+box off; set(gca,'Layer','top'); set(gca,'Fontsize',32); set(gca,'FontName','Calibri'); % Set Font
+
+% Plot
+crop = max(cells{s,1}(:,p));
+for k = 1:numComp(s) % for each cluster
+    plot((min(cells{s,1}(:,p)):crop)/unit_conversion{1}(s,p-2),...
+        parameter_dists{s,p-2}(k,:),'color',cmap_cluster{s,1}(k,:),'linewidth',6)
+end
+
+crop = 1500;
+% Axes
+try
+    set(gca,'XTick',...
+        [min(cells{s,1}(:,p))/unit_conversion{1}(s,p-2), (min(cells{s,1}(:,p))/unit_conversion{1}(s,p-2))*10,...
+        crop/unit_conversion{1}(s,p-2)]); % set x tick labels
+catch
+    set(gca,'XTick',...
+        [min(cells{s,1}(:,p))/unit_conversion{1}(s,p-2), (crop/unit_conversion{1}(s,p-2))/2,...
+        crop/unit_conversion{1}(s,p-2)]); % set x tick labels
+end
+axis([min(cells{s,1}(:,p))/unit_conversion{1}(s,p-2) crop/unit_conversion{1}(s,p-2) ...
+    min(parameter_dists{s,p-2}(:)) max(parameter_dists{s,p-2}(:))]); % Set axis limits
+
+% Set decimal places depending on units
+if unit_conversion{1}(s,p-2) > 1
+    xtickformat('%.2f');
+else
+    xtickformat('%.0f');
+end
+
+set(gca,'XScale','log'); % set log axis
+xlabel(units{1}(p-2),'Fontsize',32); % X labels
+ylabel('Probability','Fontsize',32); % Y label
+
+% Legend 
+
+            
 clear b bs_l b scrap
 
 %% Save data here (180522) 
