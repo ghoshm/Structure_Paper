@@ -189,12 +189,12 @@ clear f
 figure; 
 % Scree Plot 
 subplot(1,2,1); hold on; 
-plot(1:length(explained),explained,'linewidth',3,'color',night_color{1});
-scatter(1:length(explained),explained,90,'filled',...
+plot(1:length(explained),explained,'linewidth',9,'color',night_color{1});
+scatter(1:length(explained),explained,270,'filled',...
     'markerfacecolor',night_color{1},'markeredgecolor','k');
-scatter(1,explained(1),90,'filled','markerfacecolor',cmap_2{1}(1,:)); 
-scatter(2,explained(2),90,'filled','markerfacecolor',cmap_2{1}(2,:)); 
-scatter(3,explained(3),90,'filled','markerfacecolor',[1 0.5 0]); 
+scatter(1,explained(1),270,'filled','markerfacecolor',cmap_2{1}(1,:)); 
+scatter(2,explained(2),270,'filled','markerfacecolor',cmap_2{1}(2,:)); 
+scatter(3,explained(3),270,'filled','markerfacecolor',[1 0.5 0]); 
 xlabel('Component','Fontsize',32); 
 ylabel('Variance Explained (%)','Fontsize',32);
 box off; set(gca, 'Layer','top'); set(gca,'Fontsize',32); % Format
@@ -203,6 +203,7 @@ axis([1 length(explained) ylim]);
 
 % Coeff Plot 
 subplot(1,2,2); hold on; 
+plot([1,length(explained)],[0 0],'--k','linewidth',3); 
 plot(coeff(:,1),'color',cmap_2{1}(1,:),'linewidth',3);
 plot(coeff(:,2),'color',cmap_2{1}(2,:),'linewidth',3); 
 plot(coeff(:,3),'color',[1 0.5 0],'linewidth',3); 
@@ -210,7 +211,7 @@ ylabel('Coefficient','Fontsize',32);
 set(gca,'XTick',1:length(explained)); 
 set(gca,'XTickLabels',{'Length','Mean','Std','Total','Min','Max'},'fontsize',32); 
 xtickangle(45); 
-axis([1 length(explained) ylim]);
+axis tight; 
 box off; set(gca, 'Layer','top'); set(gca,'Fontsize',32); % Format
 set(gca,'FontName','Calibri');
 
@@ -341,7 +342,7 @@ for s = 1:2 % for active & inactive
     % Maximum lifetime threshold line 
     line(get(gca,'xlim'), [th(s,1) th(s,1)],'LineStyle',':','LineWidth',1.5);
     text(1,double(th(s,1)),'Maximum Lifetime Cut','verticalalignment','bottom',...
-        'FontName','Calibri','FontSize',16);
+        'FontName','Calibri','FontSize',18);
     
     % EA Matrix
     subplot('position', [0.0500    0.0500    0.9000    0.7478]);
@@ -350,7 +351,7 @@ for s = 1:2 % for active & inactive
     c = colorbar;
     c.Label.String = 'E.A. Index';
     c.Location = 'southoutside';
-    c.FontSize = 16;
+    c.FontSize = 18;
 end
 
 clear s H perm lineColours colourList c i l scrap
@@ -454,7 +455,7 @@ for s = 1:2 % for active & inactive
             end 
             
             axis([0 max(numComp)+1 -1 2]);
-            xlabel('Cluster Number','Fontsize',12); % X labels
+            xlabel('Module Number','Fontsize',12); % X labels
             set(gca,'XTick',1:max(numComp)); 
             set(gca,'YTick',[0 1]); 
             set(gca,'YTickLabels',{'Inactive','Active'},'Fontsize',12);
