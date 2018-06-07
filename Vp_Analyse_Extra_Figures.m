@@ -46,10 +46,9 @@ x = find(sum(isnan(delta_px_sq_sec_smooth'))==0,1,'first') + time_bins:...
 set(gca,'XTick',x); 
 set(gca,'XTickLabel',{(0:size(x,2)-1)*12})
 xlabel('Time (Hours)','Fontsize',32);
-ylabel('Delta Px','Fontsize',32);
+ylabel({'Delta Px' ; '(Total/Second)'},'Fontsize',32);
 
 clear a g h icons plots str legend_cell legend_cols legend_lines n r x y_lims 
-
 
 %% Example Parameters 
 
@@ -83,11 +82,11 @@ for g = 1:max(group_tags) % for each group
         spread_cols = plotSpread(data{1}(experiment_tags(group_tags == g) == e),...
             'xValues',g,'distributionColors',...
             cmap_2(col,:)+(1-cmap_2(col,:))*(1-(1/e^.5)),'showMM',2);
-        spread_cols{2}.LineWidth = 3; spread_cols{2}.Color = [1 0.5 0]; % Change marker properties
+        spread_cols{2}.LineWidth = 6; spread_cols{2}.Color = [1 0.5 0]; % Change marker properties
         spread_cols = plotSpread(data{2}(experiment_tags(group_tags == g) == e),...
             'xValues',g+1,'distributionColors',...
             cmap_2(col+1,:)+(1-cmap_2(col+1,:))*(1-(1/e^.5)),'showMM',2);
-        spread_cols{2}.LineWidth = 3; spread_cols{2}.Color = [1 0.5 0]; % Change marker properties
+        spread_cols{2}.LineWidth = 6; spread_cols{2}.Color = [1 0.5 0]; % Change marker properties
     end
     set(findall(gca,'type','line'),'markersize',30); % change marker sizes
     
@@ -107,7 +106,7 @@ clear scrap data legend_lines legend_cols legend_cell r sample crop y_lims sprea
 box off; set(gca, 'Layer','top'); set(gca,'Fontsize',32); set(gca,'FontName','Calibri'); % Set Font
 
 % V3
-crop = 750; % crop
+crop = 250; % crop
 
 % Take day & night distributions across time windows
 scrap{1,1} = reshape(permute(parameter_dists{p}(:,:,days_crop(days)),[1 3 2]),...
