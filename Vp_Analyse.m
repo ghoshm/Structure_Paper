@@ -490,7 +490,7 @@ x = lb_sec(time_window(1)):(60*60*12):(lb_sec(time_window(2)+1)-1);
 set(gca,'XTick',x); 
 set(gca,'XTickLabel',{(0:size(x,2)-1)*12})
 xlabel('Time (Hours)','Fontsize',32);
-ylabel('Delta Px','Fontsize',32);
+ylabel({'Delta Px' ; '(Total/Second)'},'Fontsize',32);
 
 clear a g h icons plots str legend_cell legend_cols legend_lines n r x y_lims 
 
