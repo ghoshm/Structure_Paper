@@ -234,7 +234,7 @@ ax = imagesc(states{1,1}(:,find(sum(isnan(states{1,1}))==0,1,'first'):...
 colormap([cmap_cluster{2,1} ; cmap_cluster{1,1}]); % merged colormap  
 set(gca,'FontName','Calibri'); box off; set(gca,'Layer','top'); set(gca,'Fontsize',32); 
 set(ax,'CDataMapping','direct'); 
-c = colorbar; c.Label.String = 'Cluster'; 
+c = colorbar; c.Label.String = 'Module'; 
 x = 0:(fps{1}*60*60*12):size((find(sum(isnan(states{1,1}))==0,1,'first'):...
 find(sum(isnan(states{1,1}))==0,1,'last')),2); % set x ticks every 12 hours 
 set(gca,'XTick',x); 
@@ -305,7 +305,7 @@ for er = 1:max(experiment_reps) % for each group of experiments
     figure; % make a figure for this experiment
     for s = 1:2 % for active/inactive
         subplot(1,2,s); hold on; clear scrap; set(gca,'FontName','Calibri');
-        title(horzcat(strings{s},' Clusters'));
+        title(horzcat(strings{s},' Modules'));
         for c = 1:size(smoothed_clusters{er,s},1) % for each cluster
             for g = 1:size(smoothed_clusters{er,s},3) % For each group
                 
@@ -408,7 +408,7 @@ for er = 1 % for the WT experiments
         set(findall(ax,'type','line'),'markersize',15); % change marker sizes
         axis tight
         box off; set(gca, 'Layer','top'); set(gca,'Fontsize',32);
-        xlabel(horzcat(strings{s},' Clusters'),'Fontsize',32);
+        xlabel(horzcat(strings{s},' Modules'),'Fontsize',32);
         set(gca, 'XTick', (1:numComp(s))+sep/2);
         set(gca,'XTickLabels',bp_order(s,:),'Fontsize',32);
         ylabel('Probability','Fontsize',32);
@@ -504,7 +504,7 @@ for er = 2:max(experiment_reps) % for each group of experiments
         
         % Axis etc
         box off; set(gca, 'Layer','top'); set(gca,'Fontsize',32);
-        xlabel(horzcat(strings{s},' Clusters'),'Fontsize',32);
+        xlabel(horzcat(strings{s},' Modules'),'Fontsize',32);
         set(gca, 'XTick', 1:numComp(s));
         set(gca,'XTickLabels',bp_order(s,:),'Fontsize',32);
         if s == 1
