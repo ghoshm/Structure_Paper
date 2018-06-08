@@ -602,10 +602,11 @@ bs_l = max(bs_l); % max length
 figure;
 subplot(1,2,1); hold on; set(gca,'FontName','Calibri');
 for b = 1:size(bouts,2) % for each bout type 
-    shadedErrorBar(1:(size(bouts{1,b},2)+2),...
+    legend_lines(b) = shadedErrorBar(1:(size(bouts{1,b},2)+2),...
         nanmean([zeros(size(bouts{1,b},1),1) bouts{1,b} zeros(size(bouts{1,b},1),1)]),...
         nanstd([zeros(size(bouts{1,b},1),1) bouts{1,b} zeros(size(bouts{1,b},1),1)])/sqrt(size(bouts{1,1},1)),...
         'lineProps',{'Color',cmap_cluster{1,1}(b,:),'LineWidth',3});
+    legend_cols(b) = legend_lines(b).mainLine; % Store color
 
 end
 
@@ -617,23 +618,13 @@ xlabel('Time (seconds)','Fontsize',32);
 ylabel('Delta Px','Fontsize',32);
 
 % Legend 
-ax1 = axes('Position',[0.35 0.5 0.1 0.4]); hold on; 
-box off; set(gca,'Layer','top'); set(gca,'Fontsize',12); set(gca,'FontName','Calibri'); % Set Font
-title('Legend');
-s_2 = 2; 
-for k = 1:numComp(s_2) % for each cluster
-    scatter(k,mod(s_2,2),300,...
-        'markerfacecolor',cmap_cluster{s_2,1}(k,:),...
-        'markeredgecolor',cmap_cluster{s_2,1}(k,:));
-end
+[~,icons,plots,~] = legend(flip(legend_cols),string(numComp(1):-1:1),'Location','best');
+legend('boxoff'); 
+set(icons(1:numComp(1)),'Fontsize',32) ; set(plots,'LineWidth',3);
 
-axis tight 
-xlabel('Module Number','Fontsize',12); % X labels
-set(gca,'XTick',1:max(numComp));
-set(gca,'YTick',[0 1]);
-set(gca,'YTickLabels',{'Inactive','Active'},'Fontsize',12);
 % Inactive Module Fits 
 % Figure Settings
+clear legend_lines legend_cols; 
 s = 2; p = 3; 
 subplot(1,2,2); hold on;
 box off; set(gca,'Layer','top'); set(gca,'Fontsize',32); set(gca,'FontName','Calibri'); % Set Font
@@ -641,8 +632,8 @@ box off; set(gca,'Layer','top'); set(gca,'Fontsize',32); set(gca,'FontName','Cal
 % Plot
 crop = max(cells{s,1}(:,p));
 for k = 1:numComp(s) % for each cluster
-    plot((min(cells{s,1}(:,p)):crop)/unit_conversion{1}(s,p-2),...
-        parameter_dists{s,p-2}(k,:),'color',cmap_cluster{s,1}(k,:),'linewidth',6)
+    legend_lines(k) = plot((min(cells{s,1}(:,p)):crop)/unit_conversion{1}(s,p-2),...
+        parameter_dists{s,p-2}(k,:),'color',cmap_cluster{s,1}(k,:),'linewidth',6); 
 end
 
 crop = 1500;
@@ -671,9 +662,11 @@ xlabel(units{1}(p-2),'Fontsize',32); % X labels
 ylabel('Probability','Fontsize',32); % Y label
 
 % Legend 
-
+[~,icons,plots,~] = legend(flip(legend_lines),string(numComp(2):-1:1),'Location','best');
+legend('boxoff'); 
+set(icons(1:numComp(2)),'Fontsize',32) ; set(plots,'LineWidth',3);
             
-clear b bs_l b scrap
+clear b bs_l legend_lines legend_cols icons plots s p crop k  
 
 %% Save data here (180522) 
 
