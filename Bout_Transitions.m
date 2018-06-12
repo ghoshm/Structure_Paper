@@ -614,7 +614,7 @@ box off; set(gca,'Layer','top'); set(gca,'Fontsize',32);
 axis([1 bs_l ylim]);
 set(gca,'XTick',2:2:bs_l);
 set(gca,'XTickLabels',{(round((1:2:bs_l)/fps{1},2,'decimals'))}); % hard coded
-xlabel('Time (seconds)','Fontsize',32);
+xlabel('Time (Seconds)','Fontsize',32);
 ylabel('Delta Px','Fontsize',32);
 
 % Legend 
@@ -633,7 +633,7 @@ box off; set(gca,'Layer','top'); set(gca,'Fontsize',32); set(gca,'FontName','Cal
 crop = max(cells{s,1}(:,p));
 for k = 1:numComp(s) % for each cluster
     legend_lines(k) = plot((min(cells{s,1}(:,p)):crop)/unit_conversion{1}(s,p-2),...
-        parameter_dists{s,p-2}(k,:),'color',cmap_cluster{s,1}(k,:),'linewidth',6); 
+        parameter_dists{s,p-2}(k,:),'color',cmap_cluster{s,1}(k,:),'linewidth',3); 
 end
 
 crop = 1500;
