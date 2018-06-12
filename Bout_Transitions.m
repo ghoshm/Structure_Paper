@@ -778,16 +778,46 @@ clear s
     % grammar with only the sequences above chance? 
     
 figure; 
-grammar_mat_sorted = flip(sortrows(grammar_mat{1,1})); % sort rows of grammar_mat  
+grammar_mat_sorted = [sum(isnan(grammar_mat{1,1})==0,2) grammar_mat{1,1}]; % append lengths as the first column 
+grammar_mat_sorted = flip(sortrows(grammar_mat_sorted)); % sort rows of grammar_mat  
+grammar_mat_sorted(:,... % remove columns with all NaN values 
+    sum(isnan(grammar_mat_sorted)) == length(grammar_mat_sorted)) = []; 
+grammar_mat_sorted(:,1) = []; % remove the lengths column 
 ax = imagesc(grammar_mat_sorted,'AlphaData',isnan(grammar_mat_sorted)==0); % imagesc with nan values in white 
 colormap([cmap_cluster{2,1} ; cmap_cluster{1,1}]); % merged colormap  
 set(gca,'FontName','Calibri'); box off; set(gca,'Layer','top'); set(gca,'Fontsize',32);
 set(ax,'CDataMapping','direct'); 
-c = colorbar; c.Label.String = 'Cluster'; 
+c = colorbar; c.Label.String = 'Module'; 
 xlabel('Position in Motif','Fontsize',32); 
 ylabel('Motif','Fontsize',32);
 
 clear ax grammar_mat_sorted c 
+
+% Insert 
+% Length Distributions 
+ax1 = axes('Position',[0.5 0.225 0.35 0.35]); hold on; 
+box off; set(gca, 'Layer','top'); set(gca,'Fontsize',16); set(gca,'FontName','Calibri'); % Set Font
+
+scrap = [sum(isnan(grammar_mat{1,1})==0,2) grammar_mat{1,1}]; % lengths & grammar 
+scrap_cmap = lbmap(length(unique(scrap(:,1))),'BlueGray'); % colormap 
+counter = 1; % start counter 
+for i = unique(scrap(:,1))' % for each motif length 
+    toy = scrap(scrap(:,1) == i,2:end); % take motifs of this length   
+    toy = toy(:); % vectorise 
+    toy(isnan(toy)) = []; % remove nan values 
+    legend_cols(counter) = plot(histcounts(toy,'BinMethod','integers','normalization','probability'),...
+        'color',scrap_cmap(counter,:),'linewidth',3);
+    counter = counter + 1; 
+end 
+
+legend(legend_cols,string(unique(scrap(:,1))),...
+    'Location','northeast');
+legend('boxoff');
+axis tight
+xlabel('Module','Fontsize',16); 
+ylabel('Probability','Fontsize',16);
+
+clear ax1 scrap scrap_cmap counter i toy legend_cols 
 
 %% Compressibility 
 % The compressibility of a sequence of uncompressed length l is given by the sum of the savings S 
