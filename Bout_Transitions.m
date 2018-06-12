@@ -795,10 +795,16 @@ clear ax grammar_mat_sorted c
 
 % Insert 
 % Length Distributions 
-ax1 = axes('Position',[0.5 0.225 0.35 0.35]); hold on; 
-box off; set(gca, 'Layer','top'); set(gca,'Fontsize',16); set(gca,'FontName','Calibri'); % Set Font
+axes('Position',[0.5 0.25 0.35 0.35]); hold on; 
+box off; set(gca, 'Layer','top'); set(gca,'Fontsize',24); set(gca,'FontName','Calibri'); % Set Font
 
 scrap = [sum(isnan(grammar_mat{1,1})==0,2) grammar_mat{1,1}]; % lengths & grammar 
+for i = unique(scrap(:,1))' % for each motif length 
+    if length(find(scrap(:,1) == i)) < 3 % if there are less than 3 motifs of this length 
+       scrap(scrap(:,1) == i,:) = []; % remove them  
+    end 
+end 
+
 scrap_cmap = lbmap(length(unique(scrap(:,1))),'BlueGray'); % colormap 
 counter = 1; % start counter 
 for i = unique(scrap(:,1))' % for each motif length 
@@ -814,10 +820,10 @@ legend(legend_cols,string(unique(scrap(:,1))),...
     'Location','northeast');
 legend('boxoff');
 axis tight
-xlabel('Module','Fontsize',16); 
-ylabel('Probability','Fontsize',16);
+xlabel('Module','Fontsize',24); 
+ylabel('Probability','Fontsize',24);
 
-clear ax1 scrap scrap_cmap counter i toy legend_cols 
+clear scrap scrap_cmap counter i toy legend_cols 
 
 %% Compressibility 
 % The compressibility of a sequence of uncompressed length l is given by the sum of the savings S 
