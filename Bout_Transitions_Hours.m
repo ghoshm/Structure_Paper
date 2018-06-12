@@ -1,4 +1,4 @@
-% Bout_Transitions 
+% Bout_Transitions_Hours
 
 % marcus.ghosh.11@ucl.ac.uk 
 
@@ -282,7 +282,7 @@ end
     
 box off; set(gca, 'Layer','top'); set(gca,'Fontsize',32); % Format
 xlabel('Time (Hours)','Fontsize',32); % X Labels 
-ylabel('Compressibility','Fontsize',32); % Y Labels
+ylabel({'Compressibility' ; '(per 500 modules)'},'Fontsize',32); % Y Labels
 axis([1 (n*24) y_lims]); 
 if er == 1 % for the WT data
    [~,icons,plots,~] = legend(legend_lines,legend_cell,'Location','northwest');
@@ -294,7 +294,8 @@ set(icons(1:g),'Fontsize',32) ; set(plots,'LineWidth',3);
 
 clear et set_token g data scrap legend_lines legend_cell y_lims a night_start n r icons plots   
 
-%% Compressibility Day vs Night 
+%% Compressibility Day vs Night
+    % Note 180612: make sure that dn_hour is set to 1-2
 figure;
 for er = 1:max(experiment_reps) % for each group of experiments
     set_token = find(experiment_reps == er,1,'first'); % settings
@@ -302,35 +303,35 @@ for er = 1:max(experiment_reps) % for each group of experiments
     hold on; set(gca,'FontName','Calibri'); clear scrap;
     
     for g = 1:max(i_group_tags(i_experiment_reps == er)) % for each group
-        clear data; 
+        clear data;
         % average day per fish
         data(:,1) = nanmean(compressibility(i_experiment_reps == er & i_group_tags == g,dn_hour == 1),2);
-        % average night per night 
-        data(:,2) = nanmean(compressibility(i_experiment_reps == er & i_group_tags == g,dn_hour == 2),2); 
+        % average night per night
+        data(:,2) = nanmean(compressibility(i_experiment_reps == er & i_group_tags == g,dn_hour == 2),2);
         plot([counter,counter+1],data,...
             'color',cmap{set_token}(g,:)+(1-cmap{set_token}(g,:))*(1-(1/(5)^.5)),'linewidth',1.5);
         errorbar([counter,counter+1],nanmean(data),nanstd(data),...
             'color',cmap{set_token}(g,:),'linewidth',3);
         counter = counter + 2; % add to counter
         
-        scrap(1,g) = min(data(:)); 
-        scrap(2,g) = max(data(:)); 
+        scrap(1,g) = min(data(:));
+        scrap(2,g) = max(data(:));
     end
     
     box off; set(gca, 'Layer','top'); set(gca,'Fontsize',32); % Format
-    if er == 1 % for the WT Data 
+    if er == 1 % for the WT Data
         set(gca, 'XTick', [1 2]); % set X-ticks
         set(gca,'XTickLabels',{'Day','Night'}); % X Labels
-    else % for the other experiments 
+    else % for the other experiments
         set(gca,'XTick',1.5:2:(max(i_group_tags(i_experiment_reps == er))*2)+.5);
         set(gca,'XTickLabels',geno_list{set_token}.colheaders); % X Labels
     end
-    ylabel('Compressibility','Fontsize',32); % Y Labels
+    ylabel({'Compressibility' ; '(per 500 modules)'},'Fontsize',32); % Y Labels
     axis([0.5 (max(i_group_tags(i_experiment_reps == er))*2)+.5 ...
         (min(scrap(1,:)) - (min(scrap(1,:))*0.05)) (max(scrap(2,:)) + (max(scrap(2,:))*0.05))]);
 end
 
-clear er set_token g scrap counter data 
+clear er set_token g scrap counter data
 
 %% Compressibility Two Way ANOVA
 dn_hour(1:14) = 1; dn_hour(15:24) = 2; dn_hour(25:38) = 3; dn_hour(39:48) = 4; 
