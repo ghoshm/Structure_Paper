@@ -33,11 +33,12 @@ ibl(1) = []; % remove NaN's
 %% Figure: Typical Motifs of Each Length 
 
 figure; 
-set(gca,'FontName','Calibri'); box off; set(gca,'Layer','top'); set(gca,'Fontsize',32);
 
 counter = 1; 
 for i = unique(scrap(:,1))' % for each motif length
     ax(counter) = subplot(2,7,counter); hold on;
+    set(gca,'FontName','Calibri'); box off; set(gca,'Layer','top'); set(gca,'Fontsize',32);
+
     temp = motif_m_dists;
     temp(scrap(:,1) ~= i,:) = NaN; % keep only motifs of this length
     
@@ -74,7 +75,7 @@ for i = unique(scrap(:,1))' % for each motif length
 end
 
 set(ax,'XLim',[1 max(x_lims(:))]); % set x limits for all subplots    
-set(ax,'Ylim',[-2 max(y_lims(:))]); % set y limits for all subplots 
+set(ax,'Ylim',[-2 25]); % set y limits for all subplots (hard coded)  
 
 p = 1:(diff([1 max(x_lims(:))])/size(motif_a_dists,1)):diff([1 max(x_lims(:))]); 
     % calculate spacing for module overlay 
@@ -107,7 +108,7 @@ ax(1).XRuler.Axle.LineStyle = 'none'; % remove axis line
 ax(1).YRuler.Axle.LineStyle = 'none'; % remove axis line 
 set(ax(1),'XTick',max(x_lims(:)));  % set x limits 
 set(ax(1),'XTickLabel',round(max(x_lims(:))/25,2)); % convert to seconds (2dp) 
-set(ax(1),'YTick',max(y_lims(:))); % set y limits  
+set(ax(1),'YTick',25); % set y limits (hard coded)   
 set(ax(1),'Fontsize',16); % font size 
 ax(1).XLabel.String = 'Time (Seconds)'; % x label 
 ax(1).YLabel.String = 'Delta Px'; % y label 
@@ -124,7 +125,7 @@ for s = 1:length(cmap_cluster_merge) % for each module
             'markeredgecolor','k');
     end
 end 
-text(max(x_lims(:))-65,23,'Module','Fontsize',16);
+text(max(x_lims(:))-65,23,'Module','FontName','Calibi','Fontsize',16);
 
 %% Real Data 
 load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\Post_Bout_Transitions.mat', 'gCount_norm');
