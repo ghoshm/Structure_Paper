@@ -33,6 +33,8 @@ ibl(1) = []; % remove NaN's
 %% Figure: Typical Motifs of Each Length 
 
 figure; 
+set(gca,'FontName','Calibri'); box off; set(gca,'Layer','top'); set(gca,'Fontsize',32);
+
 counter = 1; 
 for i = unique(scrap(:,1))' % for each motif length
     ax(counter) = subplot(2,7,counter); hold on;
