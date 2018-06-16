@@ -125,7 +125,7 @@ for s = 1:length(cmap_cluster_merge) % for each module
             'markeredgecolor','k');
     end
 end 
-text(max(x_lims(:))-65,23,'Module','FontName','Calibi','Fontsize',16);
+text(max(x_lims(:))-65,23,'Module','FontName','Calibri','Fontsize',16);
 
 %% Real Data 
 load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\Post_Bout_Transitions.mat', 'gCount_norm');

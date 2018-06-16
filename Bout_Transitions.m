@@ -1353,7 +1353,7 @@ for s = 1:length(cmap_cluster_merge) % for each module
             'markeredgecolor','k');
     end
 end 
-text(max(xlim)-30,16,'Module','FontName','Calibi','Fontsize',16);
+text(max(xlim)-30,16,'Module','FontName','Calibri','Fontsize',16);
 
 % WT Constraint/Enrichment DELTA  
 data = gCount_norm{1,1}(comps_v{er,1}(1:mRMR_ms(er,1)),...
