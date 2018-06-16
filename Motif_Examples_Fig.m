@@ -1,7 +1,7 @@
 % Motif Examples Figure 
 
 load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\180523.mat', 'grammar_mat')
-motif_m_dists = zeros(length(grammar_mat{1,1}),max(grammar_mat{1,1}(:))); % allocate  
+motif_m_dists = zeros(length(grammar_mat{1,1}),max(grammar_mat{1,1}(:))); % motifs x modules  
 edges = 1:(max(grammar_mat{1,1}(:))+1); % hist count edges 
 for s = 1:length(grammar_mat{1,1}) % for each motif 
     scrap = histcounts(grammar_mat{1,1}(s,:),edges); % count it's modules
@@ -27,7 +27,7 @@ load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\Post_Bout_Transitions.mat
 load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\Post_Bout_Transitions.mat', 'numComp'); 
 
 % mean inactive module length (frames) 
-ibl = grpstats(sleep_cells(:,3),idx_numComp_sorted{2,1},'mean');  
+ibl = grpstats(sleep_cells(:,3),idx_numComp_sorted{2,1},'mean'); % average length  
 ibl(1) = []; % remove NaN's 
 
 %% Figure: Typical Motifs of Each Length 
@@ -44,7 +44,7 @@ for i = unique(scrap(:,1))' % for each motif length
         % matches the average module stats for this length  
     seq = grammar_mat{1,1}(idx,:); % find this motifs module sequence 
     seq(isnan(seq)) = []; % remove nan values 
-    a = 0; % start a counter (frames) 
+    a = 1; % start a counter (frames) 
     
     for t = 1:length(seq) % for each module in the sequence 
         if seq(t) <= numComp(1) % for the inactive modules 
@@ -63,7 +63,7 @@ for i = unique(scrap(:,1))' % for each motif length
         axis off;
     end
     
-    x_lims(counter,:) = xlim; % track the x limits   
+    x_lims(counter,:) = [1 a]; % track the x limits   
     y_lims(counter,:) = ylim; % track the y limits
 
     counter = counter + 1; % add to counter 
@@ -71,10 +71,10 @@ for i = unique(scrap(:,1))' % for each motif length
     end 
 end
 
-set(ax,'XLim',minmax(x_lims(:)')); % set x limits for all subplots    
+set(ax,'XLim',[1 max(x_lims(:))]); % set x limits for all subplots    
 set(ax,'Ylim',[-2 max(y_lims(:))]); % set y limits for all subplots 
 
-p = 1:(diff(minmax(x_lims(:)'))/size(motif_a_dists,1)):diff(minmax(x_lims(:)')); 
+p = 1:(diff([1 max(x_lims(:))])/size(motif_a_dists,1)):diff([1 max(x_lims(:))]); 
     % calculate spacing for module overlay 
     
 % Module Overlay 
@@ -122,7 +122,7 @@ for s = 1:length(cmap_cluster_merge) % for each module
             'markeredgecolor','k');
     end
 end 
-text(max(x_lims(:))-70,23,'Module','Fontsize',16);
+text(max(x_lims(:))-65,23,'Module','Fontsize',16);
 
 %% Real Data 
 load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\Post_Bout_Transitions.mat', 'gCount_norm');
