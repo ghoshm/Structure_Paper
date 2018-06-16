@@ -1293,79 +1293,118 @@ end
 
 clear er set_token  
 
-%% Interesting Motifs Figure 
+%% Interesting Motifs Figure - V2  
     % 3 subplots 
-        % mRMR Motif cluster sequences  
+        % mRMR Motif module sequences  
         % mRMR Motif Z-scores day and nights (mean + std) 
         % tSNE of mRMR Motif space 
 
 % Settings 
 er = 1; % set interest
-set_token =  find(experiment_reps == er,1,'first'); % settings
+set_token = find(experiment_reps == er,1,'first'); % settings
+
+% mean inactive module length (frames) 
+ibl = grpstats(sleep_cells(:,3),idx_numComp_sorted{2,1},'mean');  
+ibl(1) = []; % remove NaN's 
+ibl(end) = 240; % crop longest module  
 
 % Motifs
 figure;
 subplot(1,3,1); % subplot
-clear scrap;
-scrap = grammar_mat{1,1}(comps_v{er,1}(1,1:mRMR_ms(er,1)),:); % grab motifs
-scrap(:,sum(isnan(scrap)) == mRMR_ms(er,1)) = []; % crop to longest sequence 
-ax = imagesc(scrap,'AlphaData',isnan(scrap)==0); % imagesc with nan values in white
-colormap([cmap_cluster{2,1} ; cmap_cluster{1,1}]); % merged colormap
-set(gca,'FontName','Calibri'); box off; set(gca,'Layer','top'); set(gca,'Fontsize',32);
-set(ax,'CDataMapping','direct');
-%c = colorbar; c.Label.String = 'Cluster'; c.Location = 'westoutside';
-xlabel('Position in Motif','Fontsize',32);
-ylabel('Motif','Fontsize',32);
-
-% WT Constraint/Enrichment 
-subplot(1,3,2); hold on; set(gca,'Ydir','reverse'); % plot from top-bottom 
-plot([0 0],[(1-0.5) (mRMR_ms(er,1)+0.5)],'-k','linewidth',1.5); clear scrap;
-for s = 1:mRMR_ms(er,1) % for each contextual motif 
-    clear data; 
-    data = squeeze(gCount_norm{1,1}(comps_v{er,1}(1,s),...
-        time_window{set_token}(1):time_window{set_token}(2),...
-        i_experiment_reps == er))';
+hold on; set(gca,'FontName','Calibri'); box off; set(gca,'Layer','top'); set(gca,'Fontsize',32);
+b = 1; % baseline counter 
+for s = flip(comps_v{er,1}(1,1:mRMR_ms(er,1))) % for each motif 
+    seq = grammar_mat{1,1}(s,:); % find this motifs module sequence
+    seq(isnan(seq)) = []; % remove nan values
+    a = 1; % start a counter (frames)
     
-    for g = 1:2 % for day/night
-        errorbar(nanmean(reshape(data(:,g:2:end),[],1)),s,...
-            nanstd(reshape(data(:,g:2:end),[],1)),'horizontal','-o',...
-            'markersize',3,'MarkerEdgeColor',cmap_2{set_token}(g,:)...
-            ,'MarkerFaceColor',cmap_2{set_token}(g,:),'linewidth',1.5,'color',cmap_2{set_token}(g,:))
+    for t = 1:length(seq) % for each module in the sequence
+        if seq(t) <= numComp(1) % for the inactive modules
+            plot([a (a+ibl(seq(t)))],[b b],...
+                'color',cmap_cluster_merge(seq(t),:),'linewidth',5); % plot
+            a = a + ibl(seq(t)); % add to time
+        else % for the active modules
+            plot(a:(a+length(nanmean(bouts{1,seq(t)-numComp(1)}))+1),...
+                [b ((nanmean(bouts{1,seq(t)-numComp(1)})/25)+b) b],...
+                'color',cmap_cluster_merge(seq(t),:),'linewidth',5); % plot
+            a = a + length(nanmean(bouts{1,seq(t)-numComp(1)})) + 1; % add to time
+        end
     end
     
-end 
-axis tight
-set(gca,'FontName','Calibri'); box off; set(gca,'Layer','top'); set(gca,'Fontsize',32);
-xlabel('Z-Score','Fontsize',32);
-set(gca,'YTick',[]); 
+    b = b + 1; % add to baseline counter 
+end
 
-% tSNE Plot 
-subplot(1,3,3); hold on; 
+axis([1 250 .5 16]); % hard coded axis 
+set(gca,'XTick',[1 250/2 250]); % hc x axis ticks  
+set(gca,'XTickLabels',[1 250/2 250]/25); % hc x axis labels 
+set(gca,'FontSize',32); 
+xlabel('Time (Seconds)','Fontsize',32); 
+ylabel('Motif','Fontsize',32);
+set(gca,'YTick',[1 8 15]); % hc y axis ticks 
+set(gca,'YTickLabels',[15 8 1],'Fontsize',32); % hc y axis labels  
+
+% WT Constraint/Enrichment DELTA  
+data = gCount_norm{1,1}(comps_v{er,1}(1:mRMR_ms(er,1)),...
+    time_window{set_token}(1):time_window{set_token}(2),...
+i_experiment_reps == er); 
+
+data = squeeze(nanmean(data(:,1:2:end,:),2))' - squeeze(nanmean(data(:,2:2:end,:),2))'; 
+
+temp = data; 
+temp(temp <= 0) = NaN; 
+data_signed(:,:,1) = temp; % positive values  
+
+temp = data; 
+temp(temp > 0) = NaN;
+data_signed(:,:,2) = temp; % negative values  
+
+subplot(1,3,2); % subplot 
+set(gca,'FontName','Calibri'); box off; set(gca,'Layer','top'); set(gca,'Fontsize',32);
+hold on; set(gca,'Ydir','reverse'); % plot from top-bottom 
+plot([0 0],[0 (mRMR_ms(er,1)+1)],'-k','linewidth',1.5); 
+
+for t = 1:2 % positive and negative values
+    spread_cols = plotSpread(data_signed(:,:,t),...
+    'xyOri','flipped','spreadWidth',.75,'distributionColors',...
+        cmap_2{set_token}(t,:)+(1-cmap_2{set_token}(t,:))*(1-(1/(5)^.5)));
+    set(findall(gca,'type','line'),'markersize',9); % change
+end
+
+% errorbar - positive 
+errorbar(nanmean(data_signed(:,nanmean(data) > 0,1)),...
+    find(nanmean(data) > 0),nanstd(data_signed(:,nanmean(data) > 0,1)),...
+    'horizontal','o','linewidth',3,'color',cmap_2{set_token}(1,:),'capsize',9);
+% errorbar - negative
+errorbar(nanmean(data_signed(:,nanmean(data) < 0,2)),...
+    find(nanmean(data) < 0),nanstd(data_signed(:,nanmean(data) < 0,2)),...
+    'horizontal','o','linewidth',3,'color',cmap_2{set_token}(2,:),'capsize',9); 
+
+axis([-15 115 0 (mRMR_ms(er,1)+.5)]); % hard coded axis 
+xlabel('? Z-Score (Day - Night)','Fontsize',32);
+set(gca,'YTick',[]); 
+ 
+% tSNE Plot
+subplot(1,3,3); hold on;
 for g = 1:max(mRMR_tw{er,1}) % for each group
     if er == 1 % for the wt mRMR_data
         scatter(mRMR_tsne{er,1}(mRMR_tw{er,1} == g,1),mRMR_tsne{er,1}(mRMR_tw{er,1} == g,2),...
             'markerfacecolor',cmap_2{set_token}(g,:),...
-            'markeredgecolor',cmap_2{set_token}(g,:));
-    else
-        scatter(mRMR_tsne{er,1}(mRMR_tw{er,1} == g,1),mRMR_tsne{er,1}(mRMR_tw{er,1} == g,2),...
-            'markerfacecolor',cmap{set_token}(g,:),...
-            'markeredgecolor',cmap{set_token}(g,:));
+            'markeredgecolor',cmap_2{set_token}(g,:),...
+            'markerfacealpha',.5);
     end
-      
-end
+end 
+
 set(gca,'FontName','Calibri'); box off; set(gca,'Layer','top'); set(gca,'Fontsize',32);
 scrap = get(gca,'Children');
 if er == 1 % for the WT data
-    [~,icons,plots,~] = legend([scrap(2) scrap(1)],'Day','Night','location','best');
-else
-    
+    legend([scrap(2) scrap(1)],'Day','Night','location','northwest');    
 end
 legend('boxoff'); 
 set(gca,'XTick',[]); set(gca,'YTick',[]); 
 xlabel('tSNE 1','Fontsize',32); 
 ylabel('tSNE 2','Fontsize',32); 
 
-clear er set_token scrap ax c s data g icons plots     
+clear er set_token ibl b s seq a t data temp data_signed spread_cols g scrap   
 
 %% PlotSpread of an IS. 
     % Note 180509 - maybe the "matchsticks" plot would be good here as the
