@@ -1343,6 +1343,18 @@ ylabel('Motif','Fontsize',32);
 set(gca,'YTick',[1 8 15]); % hc y axis ticks 
 set(gca,'YTickLabels',[15 8 1],'Fontsize',32); % hc y axis labels  
 
+% Legend 
+for s = 1:length(cmap_cluster_merge) % for each module 
+    if s <= numComp(1) % for the inactive modules 
+        scatter(max(xlim)-20,(s/5)+14.5,90,'markerfacecolor',cmap_cluster_merge(s,:),...
+            'markeredgecolor','k');
+    else % for the active modules 
+        scatter(max(xlim),((s-numComp(1))/5)+14.5,90,'markerfacecolor',cmap_cluster_merge(s,:),...
+            'markeredgecolor','k');
+    end
+end 
+text(max(xlim)-30,16,'Module','FontName','Calibi','Fontsize',16);
+
 % WT Constraint/Enrichment DELTA  
 data = gCount_norm{1,1}(comps_v{er,1}(1:mRMR_ms(er,1)),...
     time_window{set_token}(1):time_window{set_token}(2),...
