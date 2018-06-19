@@ -1293,7 +1293,8 @@ end
 
 clear er set_token  
 
-%% Interesting Motifs Figure - V2  
+%% Interesting Motifs Figure - V3  
+    % Sorted by day vs night z-score 
     % 3 subplots 
         % mRMR Motif module sequences  
         % mRMR Motif Z-scores day and nights (mean + std) 
@@ -1306,14 +1307,31 @@ set_token = find(experiment_reps == er,1,'first'); % settings
 % mean inactive module length (frames) 
 ibl = grpstats(sleep_cells(:,3),idx_numComp_sorted{2,1},'mean');  
 ibl(1) = []; % remove NaN's 
-ibl(end) = 240; % crop longest module  
+ibl(end) = 240; % crop longest module (hard coded)   
+
+% Data to scatter & Motif order 
+data = gCount_norm{1,1}(comps_v{er,1}(1:mRMR_ms(er,1)),...
+    time_window{set_token}(1):time_window{set_token}(2),...
+i_experiment_reps == er); 
+
+data = squeeze(nanmean(data(:,1:2:end,:),2))' - squeeze(nanmean(data(:,2:2:end,:),2))'; 
+[~,O] = sort(nanmean(data)); % mean difference (ascending)   
+data = data(:,O); % sort by mean difference 
+
+temp = data; 
+temp(temp <= 0) = NaN; 
+data_signed(:,:,1) = temp; % positive values  
+
+temp = data; 
+temp(temp > 0) = NaN;
+data_signed(:,:,2) = temp; % negative values  
 
 % Motifs
 figure;
 subplot(1,3,1); % subplot
 hold on; set(gca,'FontName','Calibri'); box off; set(gca,'Layer','top'); set(gca,'Fontsize',32);
-b = 1; % baseline counter 
-for s = flip(comps_v{er,1}(1,1:mRMR_ms(er,1))) % for each motif 
+b = 1; % baseline counter (plots from bottom to top) 
+for s = comps_v{er,1}(1,O) % for each motif 
     seq = grammar_mat{1,1}(s,:); % find this motifs module sequence
     seq(isnan(seq)) = []; % remove nan values
     a = 1; % start a counter (frames)
@@ -1340,8 +1358,8 @@ set(gca,'XTickLabels',[1 250/2 250]/25); % hc x axis labels
 set(gca,'FontSize',32); 
 xlabel('Time (Seconds)','Fontsize',32); 
 ylabel('Motif','Fontsize',32);
-set(gca,'YTick',[1 8 15]); % hc y axis ticks 
-set(gca,'YTickLabels',[15 8 1],'Fontsize',32); % hc y axis labels  
+set(gca,'YTick',1:length(O)); % hc y axis ticks 
+set(gca,'YTickLabels',O,'Fontsize',32); % hc y axis labels  
 
 % Legend 
 for s = 1:length(cmap_cluster_merge) % for each module 
@@ -1356,23 +1374,9 @@ end
 text(max(xlim)-30,16,'Module','FontName','Calibri','Fontsize',16);
 
 % WT Constraint/Enrichment DELTA  
-data = gCount_norm{1,1}(comps_v{er,1}(1:mRMR_ms(er,1)),...
-    time_window{set_token}(1):time_window{set_token}(2),...
-i_experiment_reps == er); 
-
-data = squeeze(nanmean(data(:,1:2:end,:),2))' - squeeze(nanmean(data(:,2:2:end,:),2))'; 
-
-temp = data; 
-temp(temp <= 0) = NaN; 
-data_signed(:,:,1) = temp; % positive values  
-
-temp = data; 
-temp(temp > 0) = NaN;
-data_signed(:,:,2) = temp; % negative values  
-
 subplot(1,3,2); % subplot 
 set(gca,'FontName','Calibri'); box off; set(gca,'Layer','top'); set(gca,'Fontsize',32);
-hold on; set(gca,'Ydir','reverse'); % plot from top-bottom 
+hold on;
 plot([0 0],[0 (mRMR_ms(er,1)+1)],'-k','linewidth',1.5); 
 
 for t = 1:2 % positive and negative values
@@ -1391,7 +1395,7 @@ errorbar(nanmean(data_signed(:,nanmean(data) < 0,2)),...
     find(nanmean(data) < 0),nanstd(data_signed(:,nanmean(data) < 0,2)),...
     'horizontal','o','linewidth',3,'color',cmap_2{set_token}(2,:),'capsize',9); 
 
-axis([-15 115 0 (mRMR_ms(er,1)+.5)]); % hard coded axis 
+axis([-15 115 .5 16]); % hard coded axis 
 xlabel('? Z-Score (Day - Night)','Fontsize',32);
 set(gca,'YTick',[]); 
  
@@ -1416,7 +1420,7 @@ set(gca,'XTick',[]); set(gca,'YTick',[]);
 xlabel('tSNE 1','Fontsize',32); 
 ylabel('tSNE 2','Fontsize',32); 
 
-clear er set_token ibl b s seq a t data temp data_signed spread_cols g scrap   
+clear er set_token ibl b s seq a t data temp data_signed spread_cols g scrap O    
 
 %% PlotSpread of an IS. 
     % Note 180509 - maybe the "matchsticks" plot would be good here as the
