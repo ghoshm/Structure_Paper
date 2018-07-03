@@ -12,7 +12,7 @@
 
 % Output 
     % Figures & Statistics 
-    % Workspace that can be used with x.m to look @ transition patterns
+    % Workspace that can be used with Bout_Transitions.m to look @ transition patterns
         % between clusters 
 
 %% Assumptions 

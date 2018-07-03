@@ -1161,12 +1161,12 @@ for er = 1:max(experiment_reps) % for each experiment repeat
                 mRMR_ms(er,counter) = find(smooth(Mdl_loss{er,1}(counter,:),3) == ...
                     min(smooth(Mdl_loss{er,1}(counter,:),3)),1,'first');
             else
-                try
-                    mRMR_ms(er,counter) = find(Mdl_loss{er,1}(counter,:) < 0.05,1,'first');
-                catch
+                %try
+                    %mRMR_ms(er,counter) = find(Mdl_loss{er,1}(counter,:) < 0.05,1,'first');
+                %catch
                     mRMR_ms(er,counter) = find(smooth(Mdl_loss{er,1}(counter,:),3) == ...
                         min(smooth(Mdl_loss{er,1}(counter,:),3)),1,'first');
-                end
+                %end
             end
             
             counter = counter + 1; % add to counter (counts comparisons)
