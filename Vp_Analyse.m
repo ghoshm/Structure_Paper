@@ -522,6 +522,11 @@ for p = 1:size(parameters,2) - 2 % For each parameter
         data{3,2} = repmat(experiment_tags,[size(data{1,2},1)/size(experiment_tags,1),1]);
         
         % V3
+        if min(dist_boundaries(:,p)) == 0 % shift from zero (for log scaling)  
+           dist_boundaries(:,p) = dist_boundaries(:,p) + 1;   
+           off_set = 1; 
+        end 
+        
         crop = max(dist_boundaries(:,p)); % crop = all data
         
         for e = 1:max(experiment_tags) % For each experimet
@@ -566,6 +571,7 @@ for p = 1:size(parameters,2) - 2 % For each parameter
         end
         axis([min(dist_boundaries(:,p))/unit_conversion(1,p) crop/unit_conversion(1,p) ...
             min(y_lims(2,:)) max(y_lims(1,:))]); % Set axis limits
+        
         try
             set(gca,'XTick',...
                 [min(dist_boundaries(:,p))/unit_conversion(1,p), (min(dist_boundaries(:,p))/unit_conversion(1,p))*10,...
@@ -575,6 +581,7 @@ for p = 1:size(parameters,2) - 2 % For each parameter
                 [min(dist_boundaries(:,p))/unit_conversion(1,p),(0.5*crop)/unit_conversion(1,p),...
                 crop/unit_conversion(1,p)]); % set x tick labels      
         end
+        
         % Set decimal places depending on units
         if unit_conversion(1,p) > 1
             xtickformat('%.2f');
@@ -582,6 +589,12 @@ for p = 1:size(parameters,2) - 2 % For each parameter
             xtickformat('%.0f');
         end
         
+        if exist('off_set','var') == 1  % check to see if data was shited from zero
+            dist_boundaries(:,p) = dist_boundaries(:,p) - 1; % remove 1 from data 
+            set(gca,'XTickLabels',string(cellfun(@str2num,get(gca,'XTickLabels')) - 1)); % remove 1 from x-labels 
+            clear off_set; 
+        end
+
         set(gca,'XScale','log'); % set log axis
         xlabel(units(p),'Fontsize',12); % X labels
         ylabel('Probability','Fontsize',12); % Y label
@@ -661,6 +674,11 @@ for p = 1:size(parameters,2) - 2 % For each parameter
         data{3,2} = repmat(experiment_tags,[size(data{1,2},1)/size(experiment_tags,1),1]);
         
         % V3
+        if min(dist_boundaries(:,p)) == 0 % shift from zero (for log scaling)
+            dist_boundaries(:,p) = dist_boundaries(:,p) + 1;
+            off_set = 1;
+        end
+        
         crop = max(dist_boundaries(:,p)); % crop = all data
         
         for e = 1:max(experiment_tags) % For each experimet
@@ -720,6 +738,13 @@ for p = 1:size(parameters,2) - 2 % For each parameter
         else
             xtickformat('%.0f');
         end
+        
+        if exist('off_set','var') == 1  % check to see if data was shited from zero
+            dist_boundaries(:,p) = dist_boundaries(:,p) - 1; % remove 1 from data
+            set(gca,'XTickLabels',string(cellfun(@str2num,get(gca,'XTickLabels')) - 1)); % remove 1 from x-labels
+            clear off_set;
+        end
+        
         set(gca,'XScale','log'); % set log axis
         xlabel(units(p),'Fontsize',12); % X labels
         ylabel('Probability','Fontsize',12); % Y label
