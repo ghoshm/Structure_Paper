@@ -408,7 +408,13 @@ for s = 1:2 % for active & inactive
         end
         
         % Plot 
+        if min(cells{s,1}(:,p)) == 0 % shift from zero (for log scaling)
+            cells{s,1}(:,p) = cells{s,1}(:,p) + 1;
+            off_set = 1;
+        end
+        
         crop = max(cells{s,1}(:,p)); 
+        
         for k = 1:numComp(s) % for each cluster
             plot((min(cells{s,1}(:,p)):crop)/unit_conversion{1}(s,p-2),...
                 parameter_dists{s,p-2}(k,:),'color',cmap_cluster{s,1}(k,:),'linewidth',3)
@@ -434,6 +440,12 @@ for s = 1:2 % for active & inactive
             xtickformat('%.0f');
         end
         
+        if exist('off_set','var') == 1  % check to see if data was shited from zero
+            cells{s,1}(:,p) = cells{s,1}(:,p) - 1; % remove 1 from data
+            set(gca,'XTickLabels',string(cellfun(@str2num,get(gca,'XTickLabels')) - 1)); % remove 1 from x-labels
+            clear off_set;
+        end
+  
         set(gca,'XScale','log'); % set log axis
         xlabel(units{1}(p-2),'Fontsize',12); % X labels
         ylabel('Probability','Fontsize',12); % Y label
