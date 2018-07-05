@@ -79,7 +79,7 @@ for i = flip(unique(scrap(:,1)))' % for each motif length (longest to shortest)
 end
 
 x_lims = max(x_lims); 
-axis([x_lims .5 (b-1)]); % hard coded axis 
+axis([x_lims .5 (b)]); % hard coded axis 
 set(gca,'XTick',round([1 x_lims(2)/2 x_lims(2)],2)); % hc x axis ticks  
 set(gca,'XTickLabels',round([1 x_lims(2)/2 x_lims(2)]/25,2)); % hc x axis labels 
 set(gca,'FontSize',32); 
