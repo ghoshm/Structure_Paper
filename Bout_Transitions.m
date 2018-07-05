@@ -788,6 +788,8 @@ colormap([cmap_cluster{2,1} ; cmap_cluster{1,1}]); % merged colormap
 set(gca,'FontName','Calibri'); box off; set(gca,'Layer','top'); set(gca,'Fontsize',32);
 set(ax,'CDataMapping','direct'); 
 c = colorbar; c.Label.String = 'Module'; 
+ax = gca;
+ax.XAxisLocation = 'top';
 xlabel('Position in Motif','Fontsize',32); 
 ylabel('Motif','Fontsize',32);
 
@@ -795,7 +797,7 @@ clear ax grammar_mat_sorted c
 
 % Insert 
 % Length Distributions 
-axes('Position',[0.5 0.25 0.35 0.35]); hold on; 
+axes('Position',[0.5 0.11 0.35 0.35]); hold on; 
 box off; set(gca, 'Layer','top'); set(gca,'Fontsize',24); set(gca,'FontName','Calibri'); % Set Font
 
 scrap = [sum(isnan(grammar_mat{1,1})==0,2) grammar_mat{1,1}]; % lengths & grammar 
@@ -819,7 +821,7 @@ end
 legend(legend_cols,string(unique(scrap(:,1))),...
     'Location','northeast');
 legend('boxoff');
-axis tight
+axis tight;
 xlabel('Module','Fontsize',24); 
 ylabel('Probability','Fontsize',24);
 
