@@ -502,13 +502,9 @@ for er = 1:max(experiment_reps) % for each experiment repeat
         end
         
         % Minimal Feature Space
-        if er == 1 % for the WT data
-            mRMR_ms(er,counter) = find(islocalmin(smooth(...
-                Mdl_loss{er,1}(counter,:),3)) == 1,1,'first');
-        else
-            mRMR_ms(er,counter) = find(Mdl_loss{er,1}(counter,:) < 0.05,1,'first');
-        end
-        
+        mRMR_ms(er,counter) = find(smooth(Mdl_loss{er,1}(counter,:),3) == ...
+            min(smooth(Mdl_loss{er,1}(counter,:),3)),1,'first');
+                
         disp(num2str(counter)); 
         counter = counter + 1; 
     end
@@ -613,7 +609,93 @@ plot((nanmean(data) - min(nanmean(data)))./range(nanmean(data)),'color',CT(g,:),
     pause(3);
 end
 
-%% Startle Motifs  
+%% Variables for Motif Plotting 
+
+ibl = grpstats(sleep_cells(:,3),idx_numComp_sorted{2,1},'mean');
+ibl(1) = []; % remove NaN's
+ibl(end) = 250; % crop longest module to 10s (hard coded)
+
+cmap_cluster_merge = [cmap_cluster{2,1} ; cmap_cluster{1,1}]; 
+
+load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\Post_Bout_Transitions.mat', 'bouts');
+
+%% Representative Temporal Motifs 
+
+er = 1; 
+set_token = find(experiment_reps == er,1,'first'); % settings
+figure; 
+
+% Motifs 
+subplot(1,2,1); 
+hold on; set(gca,'FontName','Calibri'); box off; set(gca,'Fontsize',32); 
+
+b = 1; % baseline counter (plots from bottom to top)
+for s = [comps_v{er,1}(1,1) 5933 26911] % for each motif (HARD CODED)
+    seq = grammar_mat{1,1}(s,:); % find this motifs module sequence
+    seq(isnan(seq)) = []; % remove nan values
+    a = 1; % start a counter (frames)
+
+    for t = 1:length(seq) % for each module in the sequence
+        if seq(t) <= numComp(1) % for the inactive modules
+            plot([a (a+ibl(seq(t)))],[b b],...
+                'color',cmap_cluster_merge(seq(t),:),'linewidth',5); % plot
+            a = a + ibl(seq(t)); % add to time
+        else % for the active modules
+            plot(a:(a+length(nanmean(bouts{1,seq(t)-numComp(1)}))+1),...
+                [b ((nanmean(bouts{1,seq(t)-numComp(1)})/28)+b) b],...
+                'color',cmap_cluster_merge(seq(t),:),'linewidth',5); % plot
+            a = a + length(nanmean(bouts{1,seq(t)-numComp(1)})) + 1; % add to time
+        end
+    end
+    
+    x_lims(b) = a; 
+    
+    b = b + 1; % add to baseline counter
+end
+
+x_lims = max(x_lims); 
+x_lims = ceil(x_lims/25)*25; 
+axis([1 x_lims .75 b]); % hard coded axis
+set(gca,'Layer','top');
+set(gca,'XTick',[1 x_lims/2 x_lims]); % hc x axis ticks
+set(gca,'XTickLabels',[1/25 (x_lims/2)/25 x_lims/25]); % hc x axis labels
+xlabel('Time (Seconds)','Fontsize',32);
+ylabel('Example Motif','Fontsize',32);
+set(gca,'YTick',1:3);
+set(gca,'YTickLabels',{'Startle','Night','Day'},'Fontsize',32); 
+
+% Traces 
+subplot(1,2,2); 
+hold on; set(gca,'FontName','Calibri'); box off; set(gca,'Fontsize',32); 
+s = comps_v{er,1}(1,1); % startle motif  
+plot(rescale(nanmean(squeeze(gCount_norm{1,1}(s,:,i_experiment_reps == er)),2))+1,...
+    'color',[1 .5 0],'linewidth',3); 
+s = 5933; % night motif  
+plot(rescale(nanmean(squeeze(gCount_norm{1,1}(s,:,i_experiment_reps == er)),2))+2,...
+    'color',cmap_2{set_token}(2,:),'linewidth',3)
+s = 26911; % day motif 
+plot(rescale(nanmean(squeeze(gCount_norm{1,1}(s,:,i_experiment_reps == er)),2))+3,...
+    'color',cmap_2{set_token}(1,:),'linewidth',3)
+
+y_lims = [.5 b+.5];
+
+% Night Patches
+a = 1; night_start = 15; % hard coded counter
+for n = 1:2
+    r(a) = rectangle('Position',[(night_start) y_lims(1)...
+        9 (y_lims(2)-y_lims(1))],...
+        'FaceColor',night_color{set_token},'Edgecolor',[1 1 1]);
+    uistack(r(a),'bottom'); % Send to back
+    night_start = 39;  
+end
+
+axis([1 size(gCount_norm{1,1},2) .75 b]); % hard coded axis
+set(gca,'Layer','top');
+xlabel('Time (Hours)','Fontsize',32);
+set(gca,'YTick',[]); 
+ylabel('Z-Score (Rescaled)','Fontsize',32); 
+
+%% Startle Motifs (Multiple)
 er = 1; 
 set_token = find(experiment_reps == er,1,'first'); % settings
 
@@ -623,12 +705,12 @@ idx = knnsearch(nanmean(gCount_norm{1,1}(:,:,i_experiment_reps == er),3),...
     'K',10);
 
 scrap = gCount_norm{1,1}(idx,:,i_experiment_reps == er);
-scrap_cmap = flip(brewermap(length(idx),'YlOrRd')); 
+scrap_cmap = lbmap(length(idx),'BlueGray'); % colormap 
 
 %% Startle Figure 
 figure; hold on; set(gca,'FontName','Calibri'); box off; 
-for s = length(idx):-1:1
-    data = [squeeze(scrap(s,1:24,:))' ; squeeze(scrap(s,25:end,:))'];
+for s = 1:length(idx)
+    data = squeeze(scrap(s,:,:))'; % fish x hours  
     errorbar(nanmean(data),nanstd(data)/sqrt(size(scrap,3)),...
         'color',scrap_cmap(s,:),'linewidth',3);
 end
@@ -637,40 +719,45 @@ y_lims = ylim;
 
 % Night Patches
 a = 1; night_start = 15; % hard coded counter
-n = 1;
-r(a) = rectangle('Position',[(night_start) y_lims(1)...
-    9 (y_lims(2)-y_lims(1))],...
-    'FaceColor',night_color{set_token},'Edgecolor',[1 1 1]);
-uistack(r(a),'bottom'); % Send to back
-a = a + 1; night_start = night_start + 24; % Add to counters
-    
+for n = 1:2
+    r(a) = rectangle('Position',[(night_start) y_lims(1)...
+        9 (y_lims(2)-y_lims(1))],...
+        'FaceColor',night_color{set_token},'Edgecolor',[1 1 1]);
+    uistack(r(a),'bottom'); % Send to back
+    night_start = 39;  
+end
+
 box off; set(gca, 'Layer','top'); set(gca,'Fontsize',32); % Format
 xlabel('Time (Hours)','Fontsize',32); % X Labels 
 ylabel('Z-Score','Fontsize',32); % Y Labels
 axis([1 (n*24) y_lims]); 
 
 % Insert 
-ax1 = axes('Position',[0.8 0.5 0.1 0.4]); hold on; 
+ax1 = axes('Position',[0.15 0.5 0.1 0.4]); hold on; 
 box off; set(gca, 'Layer','top'); set(gca,'Fontsize',16); set(gca,'FontName','Calibri'); % Set Font
-set(gca,'Ydir','reverse'); 
 set(gca,'color','none'); 
 
-% Motifs
-clear scrap;
-scrap = grammar_mat{1,1}(idx,:); % grab motifs
-scrap(:,sum(isnan(scrap)) == size(scrap,1)) = [];
-ax = imagesc(scrap,'AlphaData',isnan(scrap)==0); % imagesc with nan values in white
-colormap([cmap_cluster{2,1} ; cmap_cluster{1,1}]); % merged colormap
-set(ax,'CDataMapping','direct');
-xlabel('Position in Motif','Fontsize',16);
-ylabel('Motif','Fontsize',16);
-ax1.XRuler.Axle.LineStyle = 'none';
-ax1.YRuler.Axle.LineStyle = 'none';
-set(ax1,'XTick',[]); set(ax1,'YTick',[]); 
+% Motif
+b = 1; % baseline counter (plots from bottom to top)
+for s = flip(comps_v{er,1}(:,1))' % for each motif
+    seq = grammar_mat{1,1}(s,:); % find this motifs module sequence
+    seq(isnan(seq)) = []; % remove nan values
+    a = 1; % start a counter (frames)
 
-% Labels 
-for s = 1:length(idx)
-    errorbar(0,s,.25,'color',scrap_cmap(s,:),'linewidth',3)
-end 
- 
+    for t = 1:length(seq) % for each module in the sequence
+        if seq(t) <= numComp(1) % for the inactive modules
+            plot([a (a+ibl(seq(t)))],[b b],...
+                'color',cmap_cluster_merge(seq(t),:),'linewidth',5); % plot
+            a = a + ibl(seq(t)); % add to time
+        else % for the active modules
+            plot(a:(a+length(nanmean(bouts{1,seq(t)-numComp(1)}))+1),...
+                [b ((nanmean(bouts{1,seq(t)-numComp(1)})/28)+b) b],...
+                'color',cmap_cluster_merge(seq(t),:),'linewidth',5); % plot
+            a = a + length(nanmean(bouts{1,seq(t)-numComp(1)})) + 1; % add to time
+        end
+    end
+
+    b = b + 1; % add to baseline counter
+end
+
 clear er set_token s idx scrap scrap_cmap data y_lims a night_start n r ax1 ax    
