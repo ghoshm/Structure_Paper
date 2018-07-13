@@ -442,7 +442,7 @@ load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\180523.mat', 'grammar_mat
 % 2. https://uk.mathworks.com/help/stats/fitcdiscr.html
 
 % Settings
-comps = 100; % number of sequences to identify
+comps = 250; % number of sequences to identify
 
 % mRMR Approach
 for er = 1:max(experiment_reps) % for each experiment repeat

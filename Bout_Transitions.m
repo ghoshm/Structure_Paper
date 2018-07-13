@@ -1129,6 +1129,9 @@ for er = 1:max(experiment_reps) % for each experiment repeat
         mRMR_tw{er,1} = repmat(i_group_tags(i_experiment_reps == er),1,...
             size(time_window{set_token}(1):time_window{set_token}(2),2))';
         mRMR_tw{er,1} = (mRMR_tw{er,1}(:)')';
+        
+        mRMR_data{er,1}(mRMR_data{er,1} < 0) = 0; % Remove negative values for now
+
     end
         
     % Pairwise Comparisons
