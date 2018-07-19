@@ -55,17 +55,18 @@
     
 % General  
 lines_per_sheet = 50000; % Specify the number of data points per Excel sheet 
-box = 2; % set which of the two boxes you want to use (*) 
+box = 1; % set which of the two boxes you want to use (*) 
 threshold = 200; % Maximum delta px value (**)  
-top_up = []; % alter to light boundaries where you topped up fish water. 
+top_up = [2 4]; % alter to light boundaries where you topped up fish water. 
     % E.g. Day 2 and 3 (top_up = [2 4]). 
     % E.g. Not topped up (top_up = []). 
+top_up_threshold = 8; % threshold for cropping data where water was topped up (***)
 time_bins = 60*15; % Choose plot smoothing (from seconds) 
-days = [1 2]; % number of days  
-nights = [1]; % number of nights 
+days = [1 2 3 4]; % number of days  
+nights = [1 2 3]; % number of nights 
 
 % Colors 
-col = 'RedBlue'; % (***) 
+col = 'RedBlue'; % (****) 
 night_color = [0.9608 0.9608 0.9608]; % color of night shading   
 
 %% Notes on Options  
@@ -81,7 +82,11 @@ night_color = [0.9608 0.9608 0.9608]; % color of night shading
     % From looking @ 6 Hcrt experiments and the PTZ experiment - data(data > 0)
     % prctile and std, there is no obvious flexible cut off that could be used. 
     
-% *** Choice of 
+% *** Again a hard coded threshold is a simple solution. 
+    % So far experiments @ 25Hz work with 10 
+    % experiments @ 15Hz work with 8
+
+% **** Choice of 
     % 'Blue'       Single-hue progression to purlish-blue (default)
     % 'BlueGray'   Diverging progression from blue to gray
     % 'BrownBlue'  Orange-white-purple diverging scheme
@@ -439,6 +444,12 @@ while time_counter < time_sq_max(end) - 10 % (10 allows for at least a night)
     time_counter = time_sq_max(lb(a,1)); % Set time counter 
     disp(horzcat('Found Light Boundary = ',num2str(a))); % Report progress
     a = a + 1; % Add to counter
+    
+    % stop once enough lb have been found 
+    if a == length([days nights])
+        break 
+    end 
+    
 end
 
 % Day vs Night
@@ -524,18 +535,18 @@ if isempty(top_up) == 0 % if fish h20 was topped up
     for t = 1:size(top_up,2) % For each top up
         [~,top_up_bin(t,1)] = find(abs(diff(max(delta_px_sq(lb(top_up(t)):lb(top_up(t)+1),:)'))) >= ...
             nanmean(abs(diff(max(delta_px_sq(lb(top_up(t)):lb(top_up(t)+1),:)')))) + ...
-            10*nanstd(abs(diff(max(delta_px_sq(lb(top_up(t)):lb(top_up(t)+1),:)')))),1,'first'); % find start 
+            top_up_threshold*nanstd(abs(diff(max(delta_px_sq(lb(top_up(t)):lb(top_up(t)+1),:)')))),1,'first'); % find start 
         
         [~,top_up_bin(t,2)] = find(abs(diff(max(delta_px_sq(lb(top_up(t)):(lb(top_up(t)) + top_up_bin(t,1) + (fps*60*20)),:)'))) >= ...
             nanmean(abs(diff(max(delta_px_sq(lb(top_up(t)):lb(top_up(t)+1),:)')))) + ...
-            10*nanstd(abs(diff(max(delta_px_sq(lb(top_up(t)):lb(top_up(t)+1),:)')))),1,'last'); % find stop 
+            top_up_threshold*nanstd(abs(diff(max(delta_px_sq(lb(top_up(t)):lb(top_up(t)+1),:)')))),1,'last'); % find stop 
         % Note that here I only look within 20mins (this helps avoid
         % reminaing viewpoint glitches "(fps*60*20)") 
         
-        %figure; hold on;
-        %plot(abs(diff(max(delta_px_sq(lb(top_up(t)):lb(top_up(t)+1),:)'))));
-        %plot([top_up_bin(t,1) top_up_bin(t,1)] - (fps*90),[0 200],'r','linewidth',3);
-        %plot([top_up_bin(t,2) top_up_bin(t,2)] + (fps*90),[0 200],'r','linewidth',3);
+        figure; hold on;
+        plot(abs(diff(max(delta_px_sq(lb(top_up(t)):lb(top_up(t)+1),:)'))));
+        plot([top_up_bin(t,1) top_up_bin(t,1)] - (fps*90),[0 200],'r','linewidth',3);
+        plot([top_up_bin(t,2) top_up_bin(t,2)] + (fps*90),[0 200],'r','linewidth',3);
         
         % To ensure you get all of the noise, cut a bit more either side 
         top_up_bin(t,1) = lb(top_up(t)) + top_up_bin(t,1) - (fps*90); % go 90s further back
