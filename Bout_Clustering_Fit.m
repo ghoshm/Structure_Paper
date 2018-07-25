@@ -268,3 +268,94 @@ for s = 1:2 % for active & inactive
 end
 
 clear idx
+
+% Data Saved Here (170725)
+
+%% Bout Proportions 
+    % ~= 70 mins for 443 fish
+
+tic
+bout_proportions{1,1} = nan(max(fish_tags{1,1}),numComp(1),max(parameter_indicies{1,1}),...
+    'single'); % fish x clusters x time windows 
+bout_proportions{2,1} = nan(max(fish_tags{2,1}),numComp(2),max(parameter_indicies{2,1}),...
+    'single'); % fish x clusters x time windows 
+
+for s = 1:2 % for active & inactive  
+    % note that comms overhead makes this faster as a for rather than a parfor loop  
+    for f = 1:max(fish_tags{s,1}) % For each fish
+        for c = 1:numComp(s) % For each bout type
+            for t = 1:max(parameter_indicies{s,1}(fish_tags{s,1}==f)) % For each time window that fish uses 
+                bout_proportions{s,1}(f,c,t) = sum(fish_tags{s,1}==f & idx_numComp_sorted{s,1}==c ...
+                    & parameter_indicies{s,1}==t)/...
+                    sum(fish_tags{s,1}==f & parameter_indicies{s,1}==t); 
+                % the number of times fish (f) uses cluster (c) @ time (t) 
+                % divided by the number of bouts fish (f) has @ time (t) 
+                
+                % Note - will return zero's when a fish doesn't use a
+                % particular bout type :-)
+            end
+        end
+    end
+end
+toc
+
+clear s f c t 
+
+%% Bout Proportion Stats
+
+for er = 1:max(experiment_reps) % for each group of experiments
+    set_token = find(experiment_reps == er,1,'first'); % used for each experiments sets settings 
+    
+    for s = 1:2 % for active & inactive
+        
+        % Grouping Variables
+        anova_group = repmat(i_group_tags(i_experiment_reps==er),...
+            [size([days{set_token} nights{set_token}],2),1])'; % groups
+        anova_experiment = repmat(i_experiment_tags(i_experiment_reps==er),...
+            [size([days{set_token} nights{set_token}],2),1])'; % experiments
+        
+        anova_time = [];
+        for t = time_window{set_token}(1):time_window{set_token}(2) % For each time window
+            anova_time = [anova_time ; ones(sum(i_experiment_reps==er),1)*mod(t,2)];
+            % Allocate alternating zeros and ones to each time window
+        end
+        anova_time = anova_time';
+        
+        % Development Grouping Variable
+        if size(days_crop{set_token}(days{set_token}),2) == ...
+                size(nights_crop{set_token}(nights{set_token}),2) ...
+                && size(days_crop{set_token}(days{set_token}),2) > 1 
+            % If there are an equal number of windows 
+            % & more than 1 time window 
+            
+            anova_development = []; % development
+            anova_development = zeros(1,size(anova_group,2)); % Pre-allocate
+            d = 1:size(anova_development,2)/(size(time_window{set_token}(1):...
+                time_window{set_token}(2),2)/2):...
+                size(anova_development,2); % divide into "24h" windows
+            for t = 1:size(d,2)-1
+                anova_development(d(t):d(t+1)-1) = t;
+            end     
+        else 
+            anova_development = ones(size(anova_experiment)); % use all ones  
+        end
+        
+        % Comparison
+        for c = 1:numComp(s) % For each cluster
+            clear scrap;
+            scrap = permute(bout_proportions{s,1}(i_experiment_reps==er,...
+                c,time_window{set_token}(1):time_window{set_token}(2)),[1 3 2]);
+            scrap = scrap(:)'; % Vectorise
+            
+            [twa.bp.p{s,er}(:,c),~,twa.bp.stats{s,er,c}] = anovan(scrap,...
+                {anova_group,anova_time,anova_development,anova_experiment},...
+                'display','off','model','full');
+        end
+        
+        clear anova_development anova_experiment anova_group anova_time ... 
+            scrap 
+    end
+end
+
+clear er set_token s anova_group anova_experiment anova_time anova_development ...
+    c scrap 
