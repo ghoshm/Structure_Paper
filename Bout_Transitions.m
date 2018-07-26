@@ -161,8 +161,8 @@ save(strcat(save_pathname,'\','180726','.mat'),'-v7.3'); % save data
 %% Load Shuffled Data
 
 %load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\180521.mat'); 
-
-clear save_pathname 
+load('D:\Behaviour\SleepWake\Re_Runs\Threading\Thesis\180726.mat');
+clear save_pathname; 
 strings{1,1} = 'Active'; strings{2,1} = 'Inactive'; 
 
 %% Filling in Data 
@@ -311,17 +311,17 @@ for er = 1:max(experiment_reps) % for each group of experiments
         for c = 1:size(smoothed_clusters{er,s},1) % for each cluster
             for g = 1:size(smoothed_clusters{er,s},3) % For each group
                 
-                if er == 1 % for the WT Data
-                    legend_lines(1,g) = plot(lb_merge{er,1}(time_window{set_token}(1)):...
-                        lb_merge{er,1}(time_window{set_token}(2)+1),...
-                        (smoothed_clusters{er,s}(c,:,g) + (smoothed_clusters_offset(er,s)*(c-1))),...
-                        'color',cmap_cluster{s}(c,:),'linewidth',5);
-                else
+%                 if er == 1 % for the WT Data
+%                     legend_lines(1,g) = plot(lb_merge{er,1}(time_window{set_token}(1)):...
+%                         lb_merge{er,1}(time_window{set_token}(2)+1),...
+%                         (smoothed_clusters{er,s}(c,:,g) + (smoothed_clusters_offset(er,s)*(c-1))),...
+%                         'color',cmap_cluster{s}(c,:),'linewidth',5);
+%                 else
                     legend_lines(1,g) = plot(lb_merge{er,1}(time_window{set_token}(1)):...
                         lb_merge{er,1}(time_window{set_token}(2)+1),...
                         (smoothed_clusters{er,s}(c,:,g) + (smoothed_clusters_offset(er,s)*(c-1))),...
                         'color',cmap{set_token}(g,:),'linewidth',5);
-                end     
+%                 end     
             end
             
             plot([lb_merge{er,1}(time_window{set_token}(1)),lb_merge{er,1}(time_window{set_token}(2)+1)],...
@@ -673,6 +673,8 @@ set(icons(1:numComp(2)),'Fontsize',32) ; set(plots,'LineWidth',3);
 clear b bs_l legend_lines legend_cols icons plots s p crop k  
 
 %% Save data here (180522) 
+load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\180522.mat', 'bouts');
+save('D:\Behaviour\SleepWake\Re_Runs\Threading\Thesis\180726_2.mat','-v7.3'); 
 
 %% -> Legion Compression 
 
