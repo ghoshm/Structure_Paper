@@ -17,7 +17,6 @@
 %% Assumptions 
 
 % Experiments in repeats have the same number of time windows 
-% Time bins assumes a constant frame rate across experiments 
 
 %% Dependencies 
 
@@ -47,8 +46,9 @@ set(0,'defaultfigurecolor',[1 1 1]); % white background
 %% Load data (Post Bout_Clustering)
 
 % Load  
-load('D:\Behaviour\SleepWake\Re_Runs\Post_State_Space_Data\Draft_1\180519.mat',...
-    '-regexp', '^(?!cells)\w'); % load data expect cells
+% load('D:\Behaviour\SleepWake\Re_Runs\Post_State_Space_Data\Draft_1\180519.mat',...
+%     '-regexp', '^(?!cells)\w'); % load data expect cells
+load('D:\Behaviour\SleepWake\Re_Runs\Post_State_Space_Data\Thesis\180725_2.mat'); 
 
 % Load Delta_px_sq data 
 for f = 1:size(filename,2) %For each file
@@ -155,13 +155,15 @@ toc
 
 clear f a b tc tw data scrap
 
-% Save Shuffled Data here 
-save(strcat(save_pathname,'\','180521','.mat'),'-v7.3'); % save data  
+% Save Shuffled Data here (180521) 
+save(strcat(save_pathname,'\','180726','.mat'),'-v7.3'); % save data  
 
 %% Load Shuffled Data
 
-load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\180521.mat'); 
+%load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\180521.mat'); 
+
 clear save_pathname 
+strings{1,1} = 'Active'; strings{2,1} = 'Inactive'; 
 
 %% Filling in Data 
 tic
@@ -251,12 +253,12 @@ all_states = double(max(idx_numComp_sorted{1,1})); % possible states
 % Note that subplot can't take single values
 ai_states(1:all_states) = 2; % specify if states are active (1) or inactive (2)
 ai_states(min(idx_numComp_sorted{1,1}):end) = 1; % specify active states (1)
-time_bins = fps{1}*60*5; % set smoothing window (note assumes a constant frame rate across experiments)
 
 % Smooth Data
 for er = 1:max(experiment_reps) % for each group of experiments
     set_token = find(experiment_reps == er,1,'first'); % used for each experiments sets settings
-    
+    time_bins = fps{set_token}*60*5; % set smoothing window (note assumes a constant frame rate across experiments)
+
     for s = 1:2 % for active/inactive clusters
         counter_2 = 1; % start counter (counts clusters)
         
@@ -361,15 +363,17 @@ clear er set_token s c g legend_lines scrap a n r
 
 %% Bout Probabilities Order
 % Sort based on WT mean day probability 
-er = 1; 
-set_token = find(experiment_reps == er,1,'first'); % used for each experiments sets settings
+% er = 1; 
+% set_token = find(experiment_reps == er,1,'first'); % used for each experiments sets settings
+% 
+% [~,bp_order(1,:)] = sort(nanmean(nanmean(bout_proportions{1,1}...
+%     (i_experiment_reps == er,:,days_crop{set_token}(days{set_token})),3)),'descend'); % active clusters
+% bp_order(2,1:numComp(2)) = 1:numComp(2); % inactive clusters (keep sorted by length)
+% bp_order(bp_order == 0) = NaN; % remove zeros
+% 
+% clear er set_token 
 
-[~,bp_order(1,:)] = sort(nanmean(nanmean(bout_proportions{1,1}...
-    (i_experiment_reps == er,:,days_crop{set_token}(days{set_token})),3)),'descend'); % active clusters
-bp_order(2,1:numComp(2)) = 1:numComp(2); % inactive clusters (keep sorted by length)
-bp_order(bp_order == 0) = NaN; % remove zeros
-
-clear er set_token 
+load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\180522.mat', 'bp_order');
 
 %% Bout Probabilities WT - Scatter
 % Plots Individual Fish
@@ -431,7 +435,7 @@ clear er set_token s ax col sep g spread_cols scrap icons plots
     % Sorted based on the WT sorting above 
     % Average probability for each fish across days/nights of interest 
 
-for er = 2:max(experiment_reps) % for each group of experiments
+for er = 1:max(experiment_reps) % for each group of experiments
     figure; clear legend_lines
     set_token = find(experiment_reps == er,1,'first'); % used for each experiments sets settings
     for s = 1:2 % for active/inactive clusters
