@@ -953,9 +953,11 @@ end
 
 %% Save data (180523 / 180730)
 
-load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\180523.mat', 'uniqueSeqs'); 
-uniqueSeqs(2:end) = [];
+%load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\180523.mat', 'uniqueSeqs'); 
+%uniqueSeqs(2:end) = [];
 % save uniqueSeqs 
+
+
 
 %% Load & Reformat Legion Data  
 load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\Grammar_Results_Final.mat',...
