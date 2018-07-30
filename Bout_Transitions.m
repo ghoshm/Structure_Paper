@@ -678,9 +678,23 @@ save('D:\Behaviour\SleepWake\Re_Runs\Threading\Thesis\180726_2.mat','-v7.3');
 
 %% -> Legion Compression 
 
-load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\180522.mat'); 
-load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\Compression_Results_Final.mat',...
-    'gTermCell','totSavings'); 
+%load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\180522.mat'); 
+% load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\Compression_Results_Final.mat',...
+%     'gTermCell','totSavings'); 
+    
+% Load Draft_1 Data 
+draft_1 = load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\Compression_Results_Final.mat',...
+    'gTermCell'); 
+
+% Load Thesis Data 
+load('D:\Behaviour\SleepWake\Re_Runs\Threading\Thesis\Compression_Results_Final_2.mat', 'gTermCell');
+load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\Post_Bout_Transitions.mat', 'cmap_cluster');
+
+% Merge grammar  
+gTermCell = [draft_1.gTermCell ; gTermCell]; 
+gTermCell = gTermCell(:,1); 
+
+clear draft_1; 
 
 %% Sequence Lengths 
 
@@ -770,6 +784,7 @@ end
 clear tc nan_locs 
 
 %% Construct Real Grammar Matrix  
+seq_lengths_pd = 1:(max(cellfun('length',uniqueSeqs{1,1})) - 1); % thesis 
 
 grammar_mat{1,1} = nan(size(uniqueSeqs{1,1},1),size(seq_lengths_pd,2)+1,'single'); % sequences x max length 
     
@@ -936,7 +951,8 @@ for s = 1:size(uniqueSeqs{1,1},1) % for each sequence
     uniqueSeqs{1,1}{s,1} = single(uniqueSeqs{1,1}{s,1}); % convert to single
 end
 
-%% Save data (180523)
+%% Save data (180523 / 180730)
+
 load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\180523.mat', 'uniqueSeqs'); 
 uniqueSeqs(2:end) = [];
 % save uniqueSeqs 
