@@ -27,7 +27,8 @@ set(0,'DefaultFigureWindowStyle','docked'); % dock figures
 set(0,'defaultfigurecolor',[1 1 1]); % white background
  
 %% Load data 
-load('D:\Behaviour\SleepWake\Re_Runs\Post_State_Space_Data\Draft_1\180519.mat'); 
+%load('D:\Behaviour\SleepWake\Re_Runs\Post_State_Space_Data\Draft_1\180519.mat'); 
+load('D:\Behaviour\SleepWake\Re_Runs\Post_State_Space_Data\Thesis\180725_2.mat'); % thesis 
 
 %% Generate Hour Indexing Variable
     % Note that as this is it will work better for experiments where
@@ -172,9 +173,10 @@ toc
 
 clear f a b tc tw data scrap
 
-save('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\180524_Hours.mat','-v7.3');
+save('D:\Behaviour\SleepWake\Re_Runs\Threading\Thesis\180731_Hours.mat','-v7.3');
 
-%% Load Data 
+%% Load Data (180524 / 180731)
+
 load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\180524_Hours.mat'); 
 
 %% Chunk Compression 
