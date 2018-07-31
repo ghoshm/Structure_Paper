@@ -957,11 +957,11 @@ end
 %uniqueSeqs(2:end) = [];
 % save uniqueSeqs 
 
-
-
 %% Load & Reformat Legion Data  
-load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\Grammar_Results_Final.mat',...
-    'gCount_norm'); 
+% load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\Grammar_Results_Final.mat',...
+%     'gCount_norm'); 
+
+load('D:\Behaviour\SleepWake\Re_Runs\Threading\Thesis\Grammar_Results_Final.mat', 'gCount_norm');
 
 temp = gCount_norm; clear gCount_norm; 
 
@@ -972,7 +972,8 @@ for tc = 1:size(temp,2) % for real & shuffled data
 end
 
 % calculate inf replacements 
-scrap = zeros(1,size(temp,2),'single'); % 1 x real & shuffled data  
+%scrap = zeros(1,size(temp,2),'single'); % 1 x real & shuffled data  
+scrap = zeros(1,11,'single'); % thesis 
 scrap(1,1) = 1; 
 inf_r = (scrap(1,1) - nanmean(scrap(1,2:end)))/nanstd(scrap); 
 
@@ -1107,6 +1108,12 @@ data = data(:)'; % vectorise
 
 clear er anova_group anova_tc anova_experiment data
 
+%% Thesis Data Merge 
+load('D:\Behaviour\SleepWake\Re_Runs\Threading\Thesis\180726_2.mat'); % threads + other bits
+load('D:\Behaviour\SleepWake\Re_Runs\Threading\Thesis\180730.mat'); % grammar 
+
+% Saved as 180731
+
 %% Identifying Interesting Sequences (is)
 
 % Notes 
@@ -1128,7 +1135,7 @@ for er = 1:max(experiment_reps) % for each experiment repeat
     set_token =  find(experiment_reps == er,1,'first'); % settings
     
     % Grab Data 
-    if er == 1 % for the WT fish
+    if er == 0 % for the WT fish
         % Organised to be:
         % rows = all day mRMR_data, then all night mRMR_data 
         % columns = sequences 
@@ -1155,7 +1162,8 @@ for er = 1:max(experiment_reps) % for each experiment repeat
         mRMR_tw{er,1} = (mRMR_tw{er,1}(:)')';
         
         mRMR_data{er,1}(mRMR_data{er,1} < 0) = 0; % Remove negative values for now
-
+        
+        
     end
         
     % Pairwise Comparisons
