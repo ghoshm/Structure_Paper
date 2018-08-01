@@ -177,7 +177,7 @@ save('D:\Behaviour\SleepWake\Re_Runs\Threading\Thesis\180731_Hours.mat','-v7.3')
 
 %% Load Data (180524 / 180731)
 
-load('D:\Behaviour\SleepWake\Re_Runs\Threading\Draft_1\180524_Hours.mat'); 
+load('D:\Behaviour\SleepWake\Re_Runs\Threading\Thesis\180731_Hours.mat'); 
 
 %% Chunk Compression 
 % Compress cluster chunks 
@@ -252,7 +252,7 @@ for g = 1:max(i_group_tags(i_experiment_reps == er)) % for each group
     clear data;
     data = compressibility(i_experiment_reps == er & i_group_tags == g,:);
     
-    if er == 1 % for the WT experiments
+    if er == 0 % for the WT experiments
         plot(data',...
             'color',cmap{set_token}(g,:)+(1-cmap{set_token}(g,:))*(1-(1/(5)^.5)),'linewidth',1.5);
         scrap(1,g) = min(data(:));
@@ -286,7 +286,7 @@ box off; set(gca, 'Layer','top'); set(gca,'Fontsize',32); % Format
 xlabel('Time (Hours)','Fontsize',32); % X Labels 
 ylabel({'Compressibility' ; '(per 500 modules)'},'Fontsize',32); % Y Labels
 axis([1 (n*24) y_lims]); 
-if er == 1 % for the WT data
+if er == 0 % for the WT data
    [~,icons,plots,~] = legend(legend_lines,legend_cell,'Location','northwest');
 else
    [~,icons,plots,~] = legend(legend_cell,'Location','northeast');
@@ -301,7 +301,7 @@ clear et set_token g data scrap legend_lines legend_cell y_lims a night_start n 
 figure;
 for er = 1:max(experiment_reps) % for each group of experiments
     set_token = find(experiment_reps == er,1,'first'); % settings
-    subplot(2,2,er); counter = 1; % counts groups for plots
+    subplot(1,2,er); counter = 1; % counts groups for plots
     hold on; set(gca,'FontName','Calibri'); clear scrap;
     
     for g = 1:max(i_group_tags(i_experiment_reps == er)) % for each group
@@ -321,7 +321,7 @@ for er = 1:max(experiment_reps) % for each group of experiments
     end
     
     box off; set(gca, 'Layer','top'); set(gca,'Fontsize',32); % Format
-    if er == 1 % for the WT Data
+    if er == 0 % for the WT Data
         set(gca, 'XTick', [1 2]); % set X-ticks
         set(gca,'XTickLabels',{'Day','Night'}); % X Labels
     else % for the other experiments
@@ -389,7 +389,7 @@ end
 
 clear er anova_group anova_experiment anova_time t anova_development d data
 
-% Saved as (180525_Hours) 
+% Saved as (180525_Hours / 180801_Hours) 
 
 %% -> Legion 
 
