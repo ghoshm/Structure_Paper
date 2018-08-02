@@ -243,7 +243,7 @@ end
 clear f h 
 
 %% Compressibility Every Hour - Figure
-er = 1; 
+er = 2; 
 set_token = find(experiment_reps == er,1,'first'); % settings
 figure;
 hold on; set(gca,'FontName','Calibri'); clear scrap;
@@ -297,11 +297,15 @@ set(icons(1:g),'Fontsize',32) ; set(plots,'LineWidth',3);
 clear et set_token g data scrap legend_lines legend_cell y_lims a night_start n r icons plots   
 
 %% Compressibility Day vs Night
-    % Note 180612: make sure that dn_hour is set to 1-2
+% settings
+tw = 48; % hard coded maximum number of time windows
+dn_hour = ones(1,tw)*2; % day and night hours
+dn_hour([1:14 25:38]) = 1; % day (1) and night (2) hours
+
 figure;
 for er = 1:max(experiment_reps) % for each group of experiments
     set_token = find(experiment_reps == er,1,'first'); % settings
-    subplot(1,2,er); counter = 1; % counts groups for plots
+    subplot(2,2,er); counter = 1; % counts groups for plots
     hold on; set(gca,'FontName','Calibri'); clear scrap;
     
     for g = 1:max(i_group_tags(i_experiment_reps == er)) % for each group
@@ -321,7 +325,7 @@ for er = 1:max(experiment_reps) % for each group of experiments
     end
     
     box off; set(gca, 'Layer','top'); set(gca,'Fontsize',32); % Format
-    if er == 0 % for the WT Data
+    if er == 1 % for the WT Data
         set(gca, 'XTick', [1 2]); % set X-ticks
         set(gca,'XTickLabels',{'Day','Night'}); % X Labels
     else % for the other experiments
@@ -329,8 +333,9 @@ for er = 1:max(experiment_reps) % for each group of experiments
         set(gca,'XTickLabels',geno_list{set_token}.colheaders); % X Labels
     end
     ylabel({'Compressibility' ; '(per 500 modules)'},'Fontsize',32); % Y Labels
-    axis([0.5 (max(i_group_tags(i_experiment_reps == er))*2)+.5 ...
-        (min(scrap(1,:)) - (min(scrap(1,:))*0.05)) (max(scrap(2,:)) + (max(scrap(2,:))*0.05))]);
+%     axis([0.5 (max(i_group_tags(i_experiment_reps == er))*2)+.5 ...
+%         (min(scrap(1,:)) - (min(scrap(1,:))*0.05)) (max(scrap(2,:)) + (max(scrap(2,:))*0.05))]);
+      axis([0.5 (max(i_group_tags(i_experiment_reps == er))*2)+.5 0.32 0.51]); % hard coded 
 end
 
 clear er set_token g scrap counter data
