@@ -820,7 +820,8 @@ clear ax grammar_mat_sorted c
 % Length Distributions 
 axes('Position',[0.5 0.11 0.35 0.35]); hold on; 
 box off; set(gca, 'Layer','top'); set(gca,'Fontsize',24); set(gca,'FontName','Calibri'); % Set Font
-
+plot([(numComp(2)+.5) (numComp(2)+.5)],[0 .25],'--k','linewidth',1.5);
+    
 scrap = [sum(isnan(grammar_mat{1,1})==0,2) grammar_mat{1,1}]; % lengths & grammar 
 for i = unique(scrap(:,1))' % for each motif length 
     if length(find(scrap(:,1) == i)) < 3 % if there are less than 3 motifs of this length 
