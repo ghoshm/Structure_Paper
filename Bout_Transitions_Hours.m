@@ -654,7 +654,7 @@ for s = [comps_v{er,1}(1,1) 5933 26911] % for each motif (HARD CODED)
             a = a + length(nanmean(bouts{1,seq(t)-numComp(1)})) + 1; % add to time
         end
     end
-    
+        
     x_lims(b) = a; 
     
     b = b + 1; % add to baseline counter
@@ -675,15 +675,18 @@ set(gca,'YTickLabels',{'Startle','Night','Day'},'Fontsize',32);
 subplot(1,2,2); 
 hold on; set(gca,'FontName','Calibri'); box off; set(gca,'Fontsize',32); 
 s = comps_v{er,1}(1,1); % startle motif  
-plot(rescale(nanmean(squeeze(gCount_norm{1,1}(s,:,i_experiment_reps == er)),2))+1,...
-    'color',[1 .5 0],'linewidth',3); 
+plot(rescale(nanmean(squeeze(gCount_norm{1,1}(s,:,i_experiment_reps == er)),2),0,.98)+1,...
+    'color',[1 .5 0],'linewidth',5); 
 s = 5933; % night motif  
-plot(rescale(nanmean(squeeze(gCount_norm{1,1}(s,:,i_experiment_reps == er)),2))+2,...
-    'color',cmap_2{set_token}(2,:),'linewidth',3)
+plot(rescale(nanmean(squeeze(gCount_norm{1,1}(s,:,i_experiment_reps == er)),2),0,.98)+2,...
+    'color',cmap_2{set_token}(2,:),'linewidth',5)
 s = 26911; % day motif 
-plot(rescale(nanmean(squeeze(gCount_norm{1,1}(s,:,i_experiment_reps == er)),2))+3,...
-    'color',cmap_2{set_token}(1,:),'linewidth',3)
-
+plot(rescale(nanmean(squeeze(gCount_norm{1,1}(s,:,i_experiment_reps == er)),2),0,.98)+3,...
+    'color',cmap_2{set_token}(1,:),'linewidth',5)
+for a = 1:3
+    r(a) = plot(xlim,[a a],'k','linewidth',1);
+    uistack(r(a),'bottom'); % Send to back
+end
 y_lims = [.5 b+.5];
 
 % Night Patches
@@ -699,7 +702,8 @@ end
 axis([1 size(gCount_norm{1,1},2) .75 b]); % hard coded axis
 set(gca,'Layer','top');
 xlabel('Time (Hours)','Fontsize',32);
-set(gca,'YTick',[]); 
+set(gca,'YTick',1:3);
+set(gca,'YTickLabels',{'Startle','Night','Day'},'Fontsize',32); 
 ylabel('Z-Score (Rescaled)','Fontsize',32); 
 
 %% Startle Motifs (Multiple)
