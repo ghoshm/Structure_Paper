@@ -11,7 +11,7 @@ https://zenodo.org/record/3344770#.XYYowShKiUm
 For questions & queries please contact: 
 marcus.ghosh.11@ucl.ac.uk 
 
-Flow diagram depicting the steps of our analysis framework: 
+Flow diagram depicting the steps of our analysis framework. Code files in this repository are shown in orange. Code in green can be found at: https://github.com/ghoshm/Legion_Code 
 
 ![Analysis_Framework](https://user-images.githubusercontent.com/26411096/65374080-9a581f80-dc7d-11e9-9230-55e011ccab18.png)
 
