@@ -52,27 +52,44 @@ clear a g h icons plots str legend_cell legend_cols legend_lines n r x y_lims
 
 %% Example Parameters 
 
+% Load Data 
+load('D:\Behaviour\SleepWake\Re_Runs\Post_Bed_Frames\Draft_1\WT_DN_23.mat');
+load('D:\Behaviour\SleepWake\Re_Runs\Post_Bed_Frames\Draft_1\WT_DN_23_ET.mat', 'experiment_tags');
+
+% Convert from number of active bouts to frequency
+p = 7; % Number of Active Bouts
+fps = 25; % frames per second
+for e = 1:max(experiment_tags) % for each experiment
+    for t = 1:size(parameter_comparisons{p},3) % for each time window
+        parameter_comparisons{p}(experiment_tags == e,1,t) = ...
+            parameter_comparisons{p}(experiment_tags == e,1,t) / ...
+            (lb_frames_diff(t,e)/25);
+    end
+    
+end
+
+experiment_tags(:) = 1; 
+
+%% Example Parameters -- Figure 
 figure;
 
-% Number of Bouts 
+% Bout Frequency
 subplot(1,2,1); hold on; col = 1; counter = 1;
 clear data legend_lines legend_cols legend_cell r sample crop y_lims spread_cols;
 box off; set(gca, 'Layer','top'); set(gca,'Fontsize',32); set(gca,'FontName','Calibri'); % Set Font
 
-p = 7; 
-    % Note this is the number of active bouts 
-    % x2 gives within 0 or 1 of total bouts 
+p = 7; % Number of Active Bouts
 col = 1;
 for g = 1:max(group_tags) % for each group
     clear data;
     % Day
-    data{1} = parameter_comparisons{p}(:,g,days_crop(days))*2; % extract data
+    data{1} = parameter_comparisons{p}(:,g,days_crop(days)); % extract data
     data{1}(isnan(data{1})) = []; % remove nan values
     data{1} = nanmean(reshape(data{1},[group_sizes(g),size(days_crop(days),2)]),2)/...
         unit_conversion(1,p); % take a mean & convert units
     
     % Night
-    data{2} = parameter_comparisons{p}(:,g,nights_crop(nights))*2;
+    data{2} = parameter_comparisons{p}(:,g,nights_crop(nights));
     data{2}(isnan(data{2})) = [];
     data{2} = nanmean(reshape(data{2},[group_sizes(g),size(nights_crop(nights),2)]),2)/...
         unit_conversion(1,p);
@@ -93,7 +110,7 @@ for g = 1:max(group_tags) % for each group
     col = col + 2;
     
 end
-ylabel('Number of Bouts','Fontsize',32); % Y labels
+ylabel('Bout Frequency (Hz)','Fontsize',32); % Y labels
 set(gca,'xtick',1:2); % Set x ticks
 set(gca,'xticklabel',{'Day','Night'},'Fontsize',32); % Name each group
 xlabel('Time','Fontsize',32); % X labels
