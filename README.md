@@ -2,9 +2,9 @@
 
 Code for Ghosh & Rihel (2020). 
 
-For a detailed description please see:
-https://www.eneuro.org/content/7/4/ENEURO.0408-19.2020
-https://www.biorxiv.org/content/10.1101/694471v1
+For a detailed description please see: https://www.eneuro.org/content/7/4/ENEURO.0408-19.2020 
+
+Or: https://www.biorxiv.org/content/10.1101/694471v1
 
 Data is avaiable at: 
 https://zenodo.org/record/3344770#.XYYowShKiUm
