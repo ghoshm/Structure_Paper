@@ -1,15 +1,16 @@
 # Structure_Paper
 
-Code for Ghosh & Rihel (2019). 
+Code for Ghosh & Rihel (2020). 
 
 For a detailed description please see: 
-https://www.biorxiv.org/content/10.1101/694471v1 
+https://www.eneuro.org/content/7/4/ENEURO.0408-19.2020
+https://www.biorxiv.org/content/10.1101/694471v1
 
 Data is avaiable at: 
 https://zenodo.org/record/3344770#.XYYowShKiUm
 
 For questions & queries please contact: 
-marcus.ghosh.11@ucl.ac.uk 
+m.ghosh@imperial.ac.uk
 
 Flow diagram depicting the steps of our analysis framework. Code files in this repository are shown in orange. Code in green can be found at: https://github.com/ghoshm/Legion_Code 
 
